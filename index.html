@@ -109,7 +109,7 @@ $("pay").onclick=async()=>{
  if(busy||!cart.size||!$("branch").value||$("pay").disabled)return;
  busy=true;renderCart();
  if(!pendingId)pendingId=crypto.randomUUID();
- const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value};
+ const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value,p_cash_received:$("method").value==="tunai"?Number($("cashReceived").value):null};
  try{
   const saleId=await check(await sb.rpc("create_sale",args));
   message("Transaksi tersimpan. ID: "+saleId);
@@ -136,7 +136,7 @@ $("adminTabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]
 $("branchForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner")return;const btn=e.submitter;btn.disabled=true;try{await check(await sb.from("branches").insert({code:$("branchCode").value.trim().toUpperCase(),name:$("branchName").value.trim(),active:true}));$("branchForm").reset();message("Cabang baru tersimpan");await load()}catch(err){message("Gagal menambah cabang: "+err.message,true);await logError(err,"branch-create")}finally{btn.disabled=false}});
 $("cashierForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner")return;const btn=e.submitter;btn.disabled=true;try{
  const {data,error}=await sb.functions.invoke("owner-create-cashier",{body:{name:$("cashierName").value.trim(),email:$("cashierEmail").value.trim(),password:$("cashierPassword").value,branch_id:$("cashierBranch").value}});
- if(error)throw Error(data?.error||error.message);if(data?.error)throw Error(data.error);
+ if(error){let detail=data?.error;try{const response=error.context;if(response && typeof response.json==="function")detail=(await response.json())?.error||detail}catch(_){}throw Error(detail||error.message)}if(data?.error)throw Error(data.error);
  $("cashierForm").reset();message("Akun Kasir berhasil dibuat");await loadManagement();
  }catch(err){message("Gagal membuat Kasir: "+err.message,true);await logError(err,"cashier-create")}finally{btn.disabled=false}});
 $("cashierList").addEventListener("click",async e=>{const b=e.target.closest("[data-save-assign]");if(!b||profile?.role!=="owner")return;const id=b.dataset.saveAssign,select=$("cashierList").querySelector(`[data-assign="${id}"]`);if(!select?.value)return;b.disabled=true;try{await check(await sb.rpc("owner_assign_cashier",{p_cashier_id:id,p_branch_id:select.value}));message("Penempatan Kasir diperbarui");await loadManagement()}catch(err){message("Assign gagal: "+err.message,true);await logError(err,"cashier-assign")}finally{b.disabled=false}});
