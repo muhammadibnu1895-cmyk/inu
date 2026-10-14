@@ -8,9 +8,13 @@
 <main><section id="login" class="panel"><h2>Masuk Owner / Kasir</h2><form id="loginForm"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button id="loginBtn">Masuk</button></form><p class="muted small">Gunakan akun yang telah dibuat di Supabase Auth dan memiliki profil aktif.</p></section>
 <section id="app"><div class="panel flex"><label>Cabang <select id="branch"></select></label><button class="secondary" id="reload">Muat ulang</button><button class="secondary" id="logout">Keluar</button><span id="role" class="muted"></span></div>
 <div id="notice" role="status" aria-live="polite"></div>
-<div class="grid"><section class="panel"><h2>Produk</h2><div id="products" class="products"></div></section><section class="panel"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">Non Tunai</option></select></label><p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
+<div class="grid"><section class="panel"><h2>Produk</h2><div id="products" class="products"></div></section><section class="panel"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">Non Tunai</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
+<label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
+<p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
+<p id="cashWarning" class="error small"></p></div>
+<p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
 <section class="panel"><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th></tr></thead><tbody id="sales"></tbody></table></div></section>
-<section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="sku" placeholder="SKU unik" required><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
+<section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">SKU dibuat otomatis dengan kode unik saat produk ditambahkan. Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -23,6 +27,15 @@ let user=null,profile=null,branches=[],products=[],cart=new Map(),pendingId=null
 function message(s,bad=false){$("notice").textContent=s;$("notice").className=bad?"error":"ok"}
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function resetRequest(){pendingId=null}
+function cartTotal(){let n=0;for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(p)n+=Number(p.price)*qty}return n}
+function updateCash(){
+ const cash=$("method").value==="tunai", total=cartTotal(), raw=$("cashReceived").value, received=Number(raw);
+ $("cashBox").hidden=!cash;
+ const valid=raw!==""&&Number.isFinite(received)&&received>=total&&received>=0;
+ $("changeDue").textContent=valid?rupiah(received-total):rupiah(0);
+ $("cashWarning").textContent=cash&&raw!==""&&!valid?"Uang diterima kurang dari total belanja.":"";
+ $("pay").disabled=busy||!cart.size||!$("branch").value||(cash&&!valid);
+}
 function showLogin(){user=null;profile=null;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
 async function check(res){if(res.error)throw res.error;return res.data}
 async function start(){
@@ -57,7 +70,7 @@ function renderCart(){
  let sum=0;let rows="";
  for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><input class="qty" data-qty="${escapeHTML(id)}" type="number" min="0" max="999" value="${qty}"></td><td>${rupiah(Number(p.price)*qty)}</td></tr>`}
  $("cart").innerHTML=rows?`<table><tbody>${rows}</tbody></table>`:"<p class='muted'>Belum ada produk dipilih.</p>";
- $("total").textContent=rupiah(sum);$("pay").disabled=busy||!cart.size||!$("branch").value;
+ $("total").textContent=rupiah(sum);updateCash();
 }
 async function loadSales(){
  const data=await check(await sb.from("sales").select("id,branch_id,sold_at,payment_method,total,status").order("sold_at",{ascending:false}).limit(30));
@@ -68,19 +81,19 @@ $("logout").onclick=async()=>{await sb.auth.signOut();cart.clear();resetRequest(
 $("reload").onclick=load;
 $("products").addEventListener("click",e=>{const btn=e.target.closest("[data-product]");if(!btn||busy)return;const id=btn.dataset.product;const qty=cart.get(id)||0;if(qty>=999)return;cart.set(id,qty+1);resetRequest();renderCart()});
 $("cart").addEventListener("change",e=>{if(!e.target.matches("[data-qty]")||busy)return;const id=e.target.dataset.qty,qty=Number(e.target.value);if(!Number.isInteger(qty)||qty<0||qty>999){renderCart();return}if(qty===0)cart.delete(id);else cart.set(id,qty);resetRequest();renderCart()});
-$("method").onchange=resetRequest;$("branch").onchange=()=>{resetRequest();loadSales().catch(e=>message(e.message,true))};
+$("cashReceived").addEventListener("input",updateCash);$("method").onchange=()=>{resetRequest();updateCash()};$("branch").onchange=()=>{resetRequest();loadSales().catch(e=>message(e.message,true))};
 $("pay").onclick=async()=>{
- if(busy||!cart.size||!$("branch").value)return;
+ if(busy||!cart.size||!$("branch").value||$("pay").disabled)return;
  busy=true;renderCart();
  if(!pendingId)pendingId=crypto.randomUUID();
  const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value};
  try{
   const saleId=await check(await sb.rpc("create_sale",args));
   message("Transaksi tersimpan. ID: "+saleId);
-  cart.clear();resetRequest();await loadSales();await load(); 
+  cart.clear();resetRequest();$("cashReceived").value="";await loadSales();await load(); 
  }catch(e){message("Transaksi belum dapat dikonfirmasi: "+e.message+". Tekan Simpan Transaksi lagi untuk mengulang permintaan yang sama.",true)}
  finally{busy=false;renderCart()}
 };
-$("productForm").onsubmit=async e=>{e.preventDefault();if(profile?.role!=="owner")return;try{await check(await sb.from("products").insert({sku:$("sku").value.trim(),name:$("productName").value.trim(),price:Number($("price").value)}));$("productForm").reset();message("Produk ditambahkan");await load()}catch(err){message(err.message,true)}};
-start();
+$("productForm").onsubmit=async e=>{e.preventDefault();if(profile?.role!=="owner")return;try{await check(await sb.from("products").insert({sku:"INU-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),name:$("productName").value.trim(),price:Number($("price").value)}));$("productForm").reset();message("Produk ditambahkan");await load()}catch(err){message(err.message,true)}};
+updateCash();start();
 </script></body></html>
