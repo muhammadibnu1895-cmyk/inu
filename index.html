@@ -39,8 +39,21 @@ const sb=window.supabase.createClient(URL_SUPABASE,KEY_SUPABASE);
 let user=null,profile=null,branches=[],products=[],cart=new Map(),pendingId=null,busy=false;
 function message(s,bad=false){$("notice").textContent=s;$("notice").className=bad?"error":"ok"}
 async function logError(e,modul="app",level="error"){
- console.error(modul,e);if(!user)return;
- try{await sb.from("app_error_logs").insert({user_id:user.id,branch_id:profile?.branch_id||null,level,module:modul,message:String(e?.message||e).slice(0,400).replace(/(bearer\s+|password[=:]\s*|token[=:]\s*)\S+/gi,"[redacted]")})}catch(x){console.warn("Log tidak tersimpan",x)}
+  console.error(modul,e);
+  if(!user)return;
+  const safeMessage=String(e?.message||e).slice(0,400)
+    .replace(/(bearer\s+|password[=:]\s*|token[=:]\s*)\S+/gi,"[redacted]");
+  try{
+    const {error}=await sb.from("app_error_logs").insert({
+      user_id:user.id,
+      branch_id:profile?.branch_id||null,
+      level,
+      module:modul,
+      message:safeMessage,
+      error_message:safeMessage
+    });
+    if(error)console.warn("Log tidak tersimpan",error);
+  }catch(x){console.warn("Log tidak tersimpan",x)}
 }
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function resetRequest(){pendingId=null}
