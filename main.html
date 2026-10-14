@@ -78,6 +78,7 @@ body.dark-mode .product-info b,body.dark-mode #management h2,body.dark-mode #own
 <div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>📊 Report & Analisa Penjualan</h2><p class="muted">Ringkasan transaksi yang dapat diakses Owner</p></div><span class="tag" id="reportScope">100 transaksi terbaru</span></div>
 <div class="stat-grid"><div class="stat-card orange"><small>Total Penjualan</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Penjualan Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>Penjualan Non Tunai</small><strong id="reportNoncash">Rp 0</strong></div></div>
+<div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total Nasi + Ayam Terjual</small><strong id="reportNasiAyamQty">—</strong><div class="muted small">QTY porsi</div></div><div class="stat-card"><small>🍗 Total Ayam Only Terjual</small><strong id="reportAyamOnlyQty">—</strong><div class="muted small">QTY pcs</div></div></div>
 <div class="report-grid" style="margin-top:16px"><section class="panel"><h3>Metode Pembayaran</h3><div class="report-bars" id="reportPaymentBars"></div></section><section class="panel"><h3>Penjualan per Cabang</h3><div class="report-bars" id="reportBranchBars"></div></section></div>
 <div class="product-charts" aria-label="Grafik informasi penjualan produk">
 <section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section>
@@ -149,7 +150,7 @@ function showView(view){
  Object.entries(sections).forEach(([name,id])=>{$(id).hidden=name!==view});
  document.querySelectorAll("#topNav [data-view]").forEach(b=>{b.classList.toggle("active",b.dataset.view===view);b.setAttribute("aria-current",b.dataset.view===view?"page":"false")});
  $("branchToolbar").hidden=!["transaction","recent"].includes(view);
- if(view==="report"){renderReport();loadProductAnalytics().catch(e=>{$("productChartStatus").textContent="Gagal memuat analisa produk: "+e.message;});}
+ if(view==="report"){renderReport();loadProductAnalytics().catch(e=>{$("productChartStatus").textContent="Gagal memuat analisa produk: "+e.message;$("reportNasiAyamQty").textContent="—";$("reportAyamOnlyQty").textContent="—";});}
  if(view==="attendance")loadAttendance();
  if(view==="recent")loadSales().catch(e=>message(e.message,true));
  window.scrollTo({top:0,behavior:"instant"});
@@ -184,6 +185,8 @@ function renderProductCharts(values,quantities){
   const max=Math.max(1,...data);
   $(id).innerHTML=data.map((v,i)=>`<div class="product-chart-column"><div class="product-chart-bar" role="img" aria-label="${["Nasi dan Ayam","Ayam","Nasi","Saus atau Sambal"][i]}: ${v}" style="height:${v>0?Math.max(1.1,v/max*100):0}%"></div></div>`).join("");
  };
+ $("reportNasiAyamQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[0]);
+ $("reportAyamOnlyQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[1]);
  chart("productValuePlot",values);chart("productQtyPlot",quantities);
  const money=values.map(v=>`<td>${rupiah(v)}</td>`).join("");
  const qty=quantities.map(v=>`<td>${new Intl.NumberFormat("id-ID").format(v)}</td>`).join("");
@@ -195,6 +198,7 @@ function renderProductCharts(values,quantities){
 async function loadProductAnalytics(){
  if(profile?.role!=="owner")return;
  const seq=++analyticsRequest;
+ $("reportNasiAyamQty").textContent="Memuat...";$("reportAyamOnlyQty").textContent="Memuat...";
  const rows=(window.reportSalesRows||[]).filter(s=>s.status==="completed");
  const values=[0,0,0,0],qtys=[0,0,0,0];
  if(!rows.length){renderProductCharts(values,qtys);$("productChartStatus").textContent="Belum ada transaksi selesai dalam 100 transaksi terbaru.";return;}
@@ -264,7 +268,7 @@ async function loadSales(){
    q=q.eq("cashier_id",user.id).gte("sold_at",start.toISOString()).lt("sold_at",end.toISOString());
  }else q=q.limit(100);
  const data=await check(await q);
- if(profile.role==="owner"){window.reportSalesRows=data;renderReport();if(currentView==="report")loadProductAnalytics().catch(e=>{$("productChartStatus").textContent="Gagal memuat analisa produk: "+e.message;});}
+ if(profile.role==="owner"){window.reportSalesRows=data;renderReport();if(currentView==="report")loadProductAnalytics().catch(e=>{$("productChartStatus").textContent="Gagal memuat analisa produk: "+e.message;$("reportNasiAyamQty").textContent="—";$("reportAyamOnlyQty").textContent="—";});}
  $("sales").innerHTML=data.map(s=>`<tr><td>${new Date(s.sold_at).toLocaleString("id-ID")}</td><td>${escapeHTML(branches.find(b=>b.id===s.branch_id)?.name||"—")}</td><td>${escapeHTML(s.payment_method)}</td><td>${escapeHTML(s.status)}</td><td>${rupiah(s.total)}</td></tr>`).join("")||"<tr><td colspan='5'>Belum ada penjualan.</td></tr>";
 }
 $("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start();await autoClockInAfterLogin()}catch(err){alert("Login PIN gagal: "+String(err?.message||err))}finally{btn.disabled=false}});
