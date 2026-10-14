@@ -18,6 +18,7 @@
 <p id="cashWarning" class="error small"></p></div>
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
 <section class="panel"><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th></tr></thead><tbody id="sales"></tbody></table></div></section>
+<section id="ownerPinPanel" class="panel" hidden><h2>Aktivasi PIN Owner (Trial)</h2><p class="muted small">Masuk dengan email dan password Owner dahulu. PIN 6 digit dikirim ke fungsi database menggunakan sesi Owner yang aktif. Jangan gunakan PIN mudah ditebak.</p><form id="ownerPinForm" class="flex"><label>PIN baru (6 digit)<input id="ownerPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN<input id="ownerPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><button id="ownerPinSave" type="submit">Simpan PIN Owner</button></form><p id="ownerPinStatus" role="status" aria-live="polite"></p><p class="hint mini">Ini hanya mengaktifkan PIN di database, belum mengubah cara login. Jangan hapus login email/password.</p></section>
 <section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">SKU dibuat otomatis dengan kode unik saat produk ditambahkan. Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
 <section id="management" class="panel" hidden>
 <h2>Pengaturan Owner <span class="tag">Trial V10</span></h2><p class="muted mini">Akun Kasir, cabang, penempatan Kasir, dan log error. Hanya untuk Owner.</p>
@@ -51,7 +52,7 @@ function updateCash(){
  $("cashWarning").textContent=cash&&raw!==""&&!valid?"Uang diterima kurang dari total belanja.":"";
  $("pay").disabled=busy||!cart.size||!$("branch").value||(cash&&!valid);
 }
-function showLogin(){user=null;profile=null;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
+function showLogin(){user=null;profile=null;$("ownerPinPanel").hidden=true;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
 async function check(res){if(res.error)throw res.error;return res.data}
 async function start(){
  const {data:{session}}=await sb.auth.getSession();
@@ -63,7 +64,7 @@ async function start(){
   $("login").style.display="none";$("app").style.display="block";
   $("identity").textContent=profile.display_name||user.email;
   $("role").textContent=profile.role==="owner"?"Owner":"Kasir";$("roleTop").textContent=profile.role==="owner"?"OWNER":"KASIR";
-  $("ownerPanel").hidden=profile.role!=="owner";
+  $("ownerPanel").hidden=profile.role!=="owner";$("ownerPinPanel").hidden=profile.role!=="owner";
   $("management").hidden=profile.role!=="owner";
   await load();
  }catch(e){showLogin();$("login").insertAdjacentHTML("beforeend",'<p class="error" id="authError"></p>');$("authError").textContent=e.message}
@@ -99,6 +100,7 @@ async function loadSales(){
  $("sales").innerHTML=data.map(s=>`<tr><td>${new Date(s.sold_at).toLocaleString("id-ID")}</td><td>${escapeHTML(branches.find(b=>b.id===s.branch_id)?.name||"—")}</td><td>${escapeHTML(s.payment_method)}</td><td>${escapeHTML(s.status)}</td><td>${rupiah(s.total)}</td></tr>`).join("")||"<tr><td colspan='5'>Belum ada penjualan.</td></tr>";
 }
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start()}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
+$("ownerPinForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner"||!user)return;const a=$("ownerPin"),b=$("ownerPinConfirm"),btn=$("ownerPinSave"),status=$("ownerPinStatus");status.textContent="";if(!/^[0-9]{6}$/.test(a.value)){status.textContent="PIN harus tepat 6 digit.";return}if(a.value!==b.value){status.textContent="Konfirmasi PIN tidak sama.";return}btn.disabled=true;try{const {error}=await sb.rpc("set_my_pin",{p_pin:a.value});if(error)throw error;status.className="ok";status.textContent="PIN Owner berhasil disimpan. Login aplikasi masih menggunakan email/password sampai sistem pin-login siap."}catch(err){status.className="error";status.textContent="Gagal menyimpan PIN: "+String(err?.message||err)}finally{a.value="";b.value="";btn.disabled=false}});
 $("logout").onclick=async()=>{await sb.auth.signOut();cart.clear();resetRequest();showLogin()};
 $("reload").onclick=load;
 $("products").addEventListener("click",e=>{const btn=e.target.closest("[data-product]");if(!btn||busy)return;const id=btn.dataset.product;const qty=cart.get(id)||0;if(qty>=999)return;cart.set(id,qty+1);resetRequest();renderCart()});
@@ -109,7 +111,7 @@ $("pay").onclick=async()=>{
  if(busy||!cart.size||!$("branch").value||$("pay").disabled)return;
  busy=true;renderCart();
  if(!pendingId)pendingId=crypto.randomUUID();
- const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value,p_cash_received:$("method").value==="tunai"?Number($("cashReceived").value):null};
+ const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value};
  try{
   const saleId=await check(await sb.rpc("create_sale",args));
   message("Transaksi tersimpan. ID: "+saleId);
@@ -136,7 +138,7 @@ $("adminTabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]
 $("branchForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner")return;const btn=e.submitter;btn.disabled=true;try{await check(await sb.from("branches").insert({code:$("branchCode").value.trim().toUpperCase(),name:$("branchName").value.trim(),active:true}));$("branchForm").reset();message("Cabang baru tersimpan");await load()}catch(err){message("Gagal menambah cabang: "+err.message,true);await logError(err,"branch-create")}finally{btn.disabled=false}});
 $("cashierForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner")return;const btn=e.submitter;btn.disabled=true;try{
  const {data,error}=await sb.functions.invoke("owner-create-cashier",{body:{name:$("cashierName").value.trim(),email:$("cashierEmail").value.trim(),password:$("cashierPassword").value,branch_id:$("cashierBranch").value}});
- if(error){let detail=data?.error;try{const response=error.context;if(response && typeof response.json==="function")detail=(await response.json())?.error||detail}catch(_){}throw Error(detail||error.message)}if(data?.error)throw Error(data.error);
+ if(error)throw Error(data?.error||error.message);if(data?.error)throw Error(data.error);
  $("cashierForm").reset();message("Akun Kasir berhasil dibuat");await loadManagement();
  }catch(err){message("Gagal membuat Kasir: "+err.message,true);await logError(err,"cashier-create")}finally{btn.disabled=false}});
 $("cashierList").addEventListener("click",async e=>{const b=e.target.closest("[data-save-assign]");if(!b||profile?.role!=="owner")return;const id=b.dataset.saveAssign,select=$("cashierList").querySelector(`[data-assign="${id}"]`);if(!select?.value)return;b.disabled=true;try{await check(await sb.rpc("owner_assign_cashier",{p_cashier_id:id,p_branch_id:select.value}));message("Penempatan Kasir diperbarui");await loadManagement()}catch(err){message("Assign gagal: "+err.message,true);await logError(err,"cashier-assign")}finally{b.disabled=false}});
