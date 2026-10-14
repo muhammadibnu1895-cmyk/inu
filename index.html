@@ -18,7 +18,7 @@
 <p id="cashWarning" class="error small"></p></div>
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
 <section class="panel"><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th></tr></thead><tbody id="sales"></tbody></table></div></section>
-<section id="attendancePanel" class="panel" hidden><h2>Absensi Kasir (WIB)</h2><p class="muted mini">Waktu absen dicatat server. Satu masuk dan pulang per hari WIB.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button">Absen Masuk</button><button id="clockOut" type="button" class="secondary">Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
+<section id="attendancePanel" class="panel" hidden><h2>Absensi Kasir (WIB)</h2><p class="muted mini">Absen Masuk otomatis saat login PIN. Absen Pulang tetap dilakukan saat selesai kerja. Waktu dicatat server (WIB).</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary">Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
 <section id="ownerPinPanel" class="panel" hidden><h2>Aktivasi PIN Owner (Trial)</h2><p class="muted small">Masuk dengan email dan password Owner dahulu. PIN 6 digit dikirim ke fungsi database menggunakan sesi Owner yang aktif. Jangan gunakan PIN mudah ditebak.</p><form id="ownerPinForm" class="flex"><label>PIN baru (6 digit)<input id="ownerPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN<input id="ownerPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><button id="ownerPinSave" type="submit">Simpan PIN Owner</button></form><p id="ownerPinStatus" role="status" aria-live="polite"></p><p class="hint mini">Ini hanya mengaktifkan PIN di database, belum mengubah cara login. Jangan hapus login email/password.</p></section>
 <section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">SKU dibuat otomatis dengan kode unik saat produk ditambahkan. Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
 <section id="management" class="panel" hidden>
@@ -101,8 +101,8 @@ async function loadSales(){
  const data=await check(await q);
  $("sales").innerHTML=data.map(s=>`<tr><td>${new Date(s.sold_at).toLocaleString("id-ID")}</td><td>${escapeHTML(branches.find(b=>b.id===s.branch_id)?.name||"—")}</td><td>${escapeHTML(s.payment_method)}</td><td>${escapeHTML(s.status)}</td><td>${rupiah(s.total)}</td></tr>`).join("")||"<tr><td colspan='5'>Belum ada penjualan.</td></tr>";
 }
-$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start()}catch(err){alert("Login PIN gagal: "+String(err?.message||err))}finally{btn.disabled=false}});
-$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start()}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
+$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start();await autoClockInAfterLogin()}catch(err){alert("Login PIN gagal: "+String(err?.message||err))}finally{btn.disabled=false}});
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start();await autoClockInAfterLogin()}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
 $("ownerPinForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner"||!user)return;const a=$("ownerPin"),b=$("ownerPinConfirm"),btn=$("ownerPinSave"),status=$("ownerPinStatus");status.textContent="";if(!/^[0-9]{6}$/.test(a.value)){status.textContent="PIN harus tepat 6 digit.";return}if(a.value!==b.value){status.textContent="Konfirmasi PIN tidak sama.";return}btn.disabled=true;try{const {error}=await sb.rpc("set_my_pin",{p_pin:a.value});if(error)throw error;status.className="ok";status.textContent="PIN Owner berhasil disimpan. Login aplikasi masih menggunakan email/password sampai sistem pin-login siap."}catch(err){status.className="error";status.textContent="Gagal menyimpan PIN: "+String(err?.message||err)}finally{a.value="";b.value="";btn.disabled=false}});
 $("logout").onclick=async()=>{await sb.auth.signOut();cart.clear();resetRequest();showLogin()};
 $("reload").onclick=load;
@@ -148,6 +148,22 @@ $("cashierForm").addEventListener("submit",async e=>{e.preventDefault();if(profi
  }catch(err){message("Gagal membuat Kasir: "+err.message,true);await logError(err,"cashier-create")}finally{btn.disabled=false}});
 $("cashierList").addEventListener("click",async e=>{const b=e.target.closest("[data-save-assign]");if(!b||profile?.role!=="owner")return;const id=b.dataset.saveAssign,select=$("cashierList").querySelector(`[data-assign="${id}"]`);if(!select?.value)return;b.disabled=true;try{await check(await sb.rpc("owner_assign_cashier",{p_cashier_id:id,p_branch_id:select.value}));message("Penempatan Kasir diperbarui");await loadManagement()}catch(err){message("Assign gagal: "+err.message,true);await logError(err,"cashier-assign")}finally{b.disabled=false}});
 async function loadErrors(){if(profile?.role!=="owner")return;try{let q=sb.from("app_error_logs").select("created_at,level,module,message,user_id,branch_id").order("created_at",{ascending:false}).limit(100);if($("errorLevel").value)q=q.eq("level",$("errorLevel").value);const data=await check(await q);$("errorList").innerHTML=data.map(x=>`<div class="log-row"><b>${escapeHTML(x.level)}</b> · ${escapeHTML(x.module)} · ${new Date(x.created_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"})} WIB<div>${escapeHTML(x.message)}</div><small class="muted">User: ${escapeHTML(x.user_id||"—")} · Cabang: ${escapeHTML(x.branch_id||"—")}</small></div>`).join("")||"Belum ada error yang tercatat"}catch(e){$("errorList").textContent="Gagal memuat error log: "+e.message}}
+// Absen masuk hanya ketika login baru berhasil, bukan setiap refresh halaman.
+async function autoClockInAfterLogin(){
+ if(profile?.role!=="kasir"||!user)return;
+ try{
+  const rows=await check(await sb.rpc("attendance_history",{p_days:1}));
+  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Jakarta",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  if(!rows.some(a=>a.cashier_id===user.id&&a.work_date===today)){
+   await check(await sb.rpc("cashier_clock_in"));
+  }
+  await loadAttendance();
+ }catch(err){
+  // Gagal absen tidak membatalkan sesi login; beri tahu kasir agar bisa melapor.
+  message("Login berhasil, tetapi absen otomatis gagal: "+String(err?.message||err),true);
+  await loadAttendance();
+ }
+}
 // ABSENSI: owner melihat semua, kasir hanya diri sendiri (dibatasi di RPC server)
 const attendanceTime=x=>x?new Date(x).toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hour12:false}):'—';
 async function loadAttendance(){
@@ -159,7 +175,7 @@ async function loadAttendance(){
    const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
    const row=rows.find(a=>a.work_date===today&&a.cashier_id===user.id);
    $("clockIn").disabled=!!row;$("clockOut").disabled=!row||!!row.checked_out_at;
-   $("attendanceStatus").textContent=!row?'Belum absen masuk hari ini.':row.checked_out_at?'Hari ini sudah absen masuk dan pulang.':'Sudah absen masuk. Absen pulang setelah selesai.';
+   $("attendanceStatus").textContent=!row?'Belum tercatat absen masuk hari ini. Silakan login ulang atau hubungi Owner.':row.checked_out_at?'Hari ini sudah absen masuk dan pulang.':'Sudah absen masuk. Absen pulang setelah selesai.';
   }else $("attendanceStatus").textContent='Riwayat seluruh kasir.';
  }catch(e){$("attendanceStatus").textContent='Gagal memuat absensi: '+e.message;$("attendanceRows").innerHTML='';}
 }
