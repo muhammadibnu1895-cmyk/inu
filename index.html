@@ -83,6 +83,7 @@ body.dark-mode .report-filters button:not(.active){background:#334155;color:#fff
 <button type="button" data-view="management" data-owner-only>⚙️ Pengaturan Owner</button>
 <button type="button" data-view="pin" data-owner-only>🔑 Pengaturan PIN</button>
 <button type="button" data-view="attendance" data-owner-only>🕒 Absensi</button>
+<button type="button" data-view="salary" data-owner-only>💰 Gaji &amp; Kasbon</button>
 <span class="nav-spacer"></span><button type="button" id="reload" class="secondary" hidden>↻ Muat Ulang</button><button type="button" id="logout" class="nav-logout" hidden>Keluar</button>
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="notice" role="status" aria-live="polite"></div>
@@ -102,6 +103,11 @@ body.dark-mode .report-filters button:not(.active){background:#334155;color:#fff
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
 </div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang otomatis saat Kasir klik Keluar. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
+<section id="salaryPanel" class="panel" hidden>
+<h2>💰 Gaji &amp; Kasbon <span class="tag">Owner</span></h2><p class="muted mini">Gaji Rp33.000 per hari hadir. Potongan kasbon ditentukan Owner. Semua nominal dalam rupiah.</p>
+<div class="admin-grid"><div><h3>Kasir &amp; Saldo Kasbon</h3><label>Kasir<select id="salaryCashier" style="width:100%"><option value="">Pilih Kasir</option></select></label><div class="stat-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px"><div class="stat-card"><small>Total Kasbon</small><strong id="salaryTotalAdvance">Rp0</strong></div><div class="stat-card orange"><small>Sisa Kasbon</small><strong id="salaryBalance">Rp0</strong></div></div><p id="salaryBalanceStatus" class="muted mini"></p><h3>Catat Kasbon Baru</h3><form id="advanceForm"><label>Nominal kasbon<input id="advanceAmount" type="number" min="1" step="1" required placeholder="Contoh: 50000"></label><label>Keterangan<input id="advanceNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="advanceSave">Simpan Kasbon</button></form><p id="advanceStatus" role="status"></p></div>
+<div><h3>Pembayaran Gaji</h3><form id="salaryForm"><label>Dari tanggal<input id="salaryStart" type="date" required></label><label>Sampai tanggal<input id="salaryEnd" type="date" required></label><label>Potongan kasbon oleh Owner<input id="salaryDeduction" type="number" min="0" step="1" value="0" required></label><button type="button" id="salaryPreviewBtn" class="secondary">Hitung Preview Gaji</button><div id="salaryPreviewResult" class="hint mini" hidden></div><button type="submit" id="salaryPayBtn" disabled>Konfirmasi Sudah Bayar Gaji</button></form><p id="salaryPayStatus" role="status"></p><p class="muted mini">Tombol pembayaran hanya mencatat gaji yang benar-benar sudah diserahkan. Tanggal yang sudah dibayar tidak akan dihitung ulang.</p></div></div>
+</section>
 <section id="ownerPinPanel" class="panel" hidden><h2>Pengaturan PIN Owner</h2><p class="muted small">Owner dapat membuat atau mengganti PIN 6 digit di sini. Jangan gunakan PIN yang mudah ditebak.</p><form id="ownerPinForm" class="flex"><label>PIN baru (6 digit)<input id="ownerPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN<input id="ownerPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><button id="ownerPinSave" type="submit">Simpan PIN Owner</button></form><p id="ownerPinStatus" role="status" aria-live="polite"></p><p class="hint mini">PIN Owner disimpan melalui fungsi database yang sudah ada. Login cadangan hanya disembunyikan dari tampilan.</p><div class="panel" style="margin-top:18px"><h3>Ganti PIN Kasir</h3><p class="muted small">Hanya Owner aktif yang dapat mengganti PIN Kasir.</p><form id="cashierPinUpdateForm" class="admin-grid"><label>Kasir<select id="pinCashierSelect" required><option value="">Pilih Kasir</option></select></label><label>PIN baru (6 digit)<input id="pinCashierNew" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN baru<input id="pinCashierConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" required></label><div><button type="submit" id="pinCashierSave">Simpan PIN Kasir</button></div></form><p id="pinCashierStatus" role="status" aria-live="polite"></p></div></section>
 <section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">SKU dibuat otomatis dengan kode unik saat produk ditambahkan. Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
 <section id="management" class="panel" hidden>
@@ -153,15 +159,16 @@ let currentView=null;
 function showView(view){
  if(!profile)return;
  const owner=profile.role==="owner";
- const valid=["report","transaction","recent","products","management","pin","attendance"];
+ const valid=["report","transaction","recent","products","management","pin","attendance","salary"];
  if(!valid.includes(view)||( !owner && !["transaction","recent"].includes(view)))view=owner?"report":"transaction";
  currentView=view;
- const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel"};
+ const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel",salary:"salaryPanel"};
  Object.entries(sections).forEach(([name,id])=>{$(id).hidden=name!==view});
  document.querySelectorAll("#topNav [data-view]").forEach(b=>{b.classList.toggle("active",b.dataset.view===view);b.setAttribute("aria-current",b.dataset.view===view?"page":"false")});
  $("branchToolbar").hidden=!["transaction","recent"].includes(view);
  if(view==="report"){loadReportPeriod();}
  if(view==="attendance")loadAttendance();
+  if(view==="salary")loadSalaryScreen();
  if(view==="recent")loadSales().catch(e=>message(e.message,true));
  window.scrollTo({top:0,behavior:"instant"});
 }
@@ -468,6 +475,72 @@ $("attendanceRefresh").onclick=loadAttendance;
 $("refreshErrors").onclick=loadErrors;$("errorLevel").onchange=loadErrors;
 window.addEventListener("unhandledrejection",e=>{logError(e.reason,"unhandled-promise")});
 window.addEventListener("error",e=>{logError(new Error(e.message),"javascript")});
+
+
+// GAJI & KASBON: akses data melalui RPC yang memeriksa Owner di server.
+let salaryPreviewSnapshot=null;
+function invalidateSalaryPreview(){salaryPreviewSnapshot=null;$("salaryPayBtn").disabled=true;$("salaryPreviewResult").hidden=true;}
+function salaryCashierId(){return $("salaryCashier").value;}
+function salaryStatus(id,text,bad=false){$(id).textContent=text;$(id).className=bad?"error mini":"ok mini";}
+async function loadSalaryScreen(){
+ if(profile?.role!=="owner")return;
+ try{
+  const old=salaryCashierId();
+  const cashiers=await check(await sb.from("profiles").select("id,display_name,active").eq("role","kasir").order("display_name"));
+  $("salaryCashier").innerHTML='<option value="">Pilih Kasir</option>'+cashiers.map(c=>`<option value="${escapeHTML(c.id)}">${escapeHTML(c.display_name||c.id)}${c.active?"":" (nonaktif)"}</option>`).join("");
+  if(cashiers.some(c=>c.id===old))$("salaryCashier").value=old;
+  await refreshSalaryBalance();
+ }catch(e){salaryStatus("salaryBalanceStatus","Gagal memuat Kasir: "+e.message,true)}
+}
+async function refreshSalaryBalance(){
+ invalidateSalaryPreview();$("salaryTotalAdvance").textContent=rupiah(0);$("salaryBalance").textContent=rupiah(0);
+ const id=salaryCashierId();if(!id){salaryStatus("salaryBalanceStatus","Pilih Kasir untuk melihat saldo.");return;}
+ try{
+  const result=await check(await sb.rpc("owner_cash_advance_balance",{p_cashier_id:id}));
+  const x=Array.isArray(result)?result[0]:result;
+  $("salaryTotalAdvance").textContent=rupiah(x?.total_kasbon||0);
+  $("salaryBalance").textContent=rupiah(x?.sisa_kasbon||0);
+  salaryStatus("salaryBalanceStatus","Total potongan gaji terdahulu: "+rupiah(x?.total_potongan||0));
+ }catch(e){salaryStatus("salaryBalanceStatus","Gagal membaca saldo: "+e.message,true)}
+}
+$("salaryCashier").addEventListener("change",refreshSalaryBalance);
+for(const id of ["salaryStart","salaryEnd","salaryDeduction"])$(id).addEventListener("input",invalidateSalaryPreview);
+$("advanceForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(profile?.role!=="owner")return;
+ const id=salaryCashierId(),amount=Number($("advanceAmount").value),btn=$("advanceSave");
+ if(!id||!Number.isSafeInteger(amount)||amount<=0){salaryStatus("advanceStatus","Pilih Kasir dan nominal kasbon yang valid.",true);return;}
+ if(!confirm("Catat kasbon "+rupiah(amount)+" untuk Kasir terpilih?"))return;
+ btn.disabled=true;
+ try{
+  await check(await sb.rpc("owner_add_cash_advance",{p_cashier_id:id,p_amount:amount,p_note:$("advanceNote").value.trim()||null}));
+  $("advanceForm").reset();salaryStatus("advanceStatus","Kasbon "+rupiah(amount)+" berhasil dicatat.");await refreshSalaryBalance();
+ }catch(err){salaryStatus("advanceStatus","Gagal menyimpan kasbon: "+err.message,true)}finally{btn.disabled=false}
+});
+$("salaryPreviewBtn").addEventListener("click",async()=>{
+ invalidateSalaryPreview();if(profile?.role!=="owner")return;
+ const id=salaryCashierId(),start=$("salaryStart").value,end=$("salaryEnd").value,deduction=Number($("salaryDeduction").value),btn=$("salaryPreviewBtn");
+ if(!id||!start||!end||end<start||!Number.isSafeInteger(deduction)||deduction<0){salaryStatus("salaryPayStatus","Pilih Kasir, periode yang benar, dan potongan yang valid.",true);return;}
+ btn.disabled=true;
+ try{
+  const result=await check(await sb.rpc("owner_salary_preview",{p_cashier_id:id,p_period_start:start,p_period_end:end,p_deduction:deduction}));
+  const x=Array.isArray(result)?result[0]:result;if(!x)throw Error("Preview kosong.");
+  $("salaryPreviewResult").innerHTML=`<b>Preview pembayaran</b><div>Hari belum dibayar: <b>${Number(x.hari_belum_dibayar)}</b></div><div>Gaji kotor: <b>${rupiah(x.gaji_kotor)}</b></div><div>Saldo kasbon: <b>${rupiah(x.saldo_kasbon)}</b></div><div>Potongan: <b>${rupiah(x.potongan_kasbon)}</b></div><div>Gaji bersih: <b>${rupiah(x.gaji_bersih)}</b></div><div>Sisa kasbon: <b>${rupiah(x.sisa_kasbon)}</b></div>`;
+  $("salaryPreviewResult").hidden=false;
+  salaryPreviewSnapshot={id,start,end,deduction,gross:Number(x.gaji_kotor),net:Number(x.gaji_bersih),days:Number(x.hari_belum_dibayar)};
+  $("salaryPayBtn").disabled=salaryPreviewSnapshot.days<1;
+  salaryStatus("salaryPayStatus",salaryPreviewSnapshot.days?"Periksa preview sebelum mencatat pembayaran.":"Tidak ada hari kerja yang belum dibayar.",!salaryPreviewSnapshot.days);
+ }catch(err){salaryStatus("salaryPayStatus","Gagal preview: "+err.message,true)}finally{btn.disabled=false}
+});
+$("salaryForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(profile?.role!=="owner"||!salaryPreviewSnapshot)return;
+ const x=salaryPreviewSnapshot,btn=$("salaryPayBtn");
+ if(!confirm(`Pastikan uang gaji bersih ${rupiah(x.net)} untuk ${x.days} hari sudah diserahkan. Catat sebagai LUNAS?`))return;
+ btn.disabled=true;
+ try{
+  const paymentId=await check(await sb.rpc("owner_pay_cashier_salary",{p_cashier_id:x.id,p_period_start:x.start,p_period_end:x.end,p_cash_advance_deduction:x.deduction}));
+  invalidateSalaryPreview();salaryStatus("salaryPayStatus","Pembayaran gaji berhasil dicatat. ID: "+paymentId);await refreshSalaryBalance();
+ }catch(err){invalidateSalaryPreview();salaryStatus("salaryPayStatus","Pembayaran belum dapat dikonfirmasi: "+err.message+". Periksa riwayat sebelum mencoba lagi.",true)}
+});
 
 updateCash();start();
 </script></body></html>
