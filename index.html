@@ -84,6 +84,7 @@ body.dark-mode .report-filters button:not(.active){background:#334155;color:#fff
 <button type="button" data-view="pin" data-owner-only>🔑 Pengaturan PIN</button>
 <button type="button" data-view="attendance" data-owner-only>🕒 Absensi</button>
 <button type="button" data-view="salary" data-owner-only>💰 Gaji &amp; Kasbon</button>
+<button type="button" data-view="export" data-owner-only>💾 Ekspor Excel</button>
 <span class="nav-spacer"></span><button type="button" id="reload" class="secondary" hidden>↻ Muat Ulang</button><button type="button" id="logout" class="nav-logout" hidden>Keluar</button>
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="notice" role="status" aria-live="polite"></div>
@@ -103,6 +104,8 @@ body.dark-mode .report-filters button:not(.active){background:#334155;color:#fff
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
 </div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang otomatis saat Kasir klik Keluar. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
+<section id="exportPanel" class="panel" hidden><h2>💾 Ekspor Excel</h2><p class="muted">Unduh satu file Excel dengan 6 sheet: Ringkasan, Penjualan, Detail Produk, Absensi, Gaji, dan Kasbon. Khusus Owner.</p>
+<form id="excelExportForm" class="admin-grid"><label>Periode<select id="excelPeriod"><option value="today">Hari Ini</option><option value="seven">7 Hari Terakhir</option><option value="month">Bulan Ini</option><option value="custom">Tanggal Bebas</option></select></label><label>Cabang<select id="excelBranch"><option value="">Semua Cabang</option></select></label><label>Tanggal mulai<input type="date" id="excelStart" required></label><label>Tanggal akhir<input type="date" id="excelEnd" required></label><div><button type="submit" id="excelDownload">⬇ Unduh Excel (.xlsx)</button></div></form><p id="excelStatus" role="status" aria-live="polite"></p><p class="muted small">Tanggal memakai WIB. Gaji dan kasbon difilter berdasarkan tanggal pencatatan/pembayaran. Cabang gaji dan kasbon mengikuti penempatan Kasir saat ini, bukan riwayat perpindahan cabang. Ekspor bukan backup database.</p></section>
 <section id="salaryPanel" class="panel" hidden>
 <h2>💰 Gaji &amp; Kasbon <span class="tag">Owner</span></h2><p class="muted mini">Gaji Rp33.000 per hari hadir. Potongan kasbon ditentukan Owner. Semua nominal dalam rupiah.</p>
 <div class="admin-grid"><div><h3>Kasir &amp; Saldo Kasbon</h3><label>Kasir<select id="salaryCashier" style="width:100%"><option value="">Pilih Kasir</option></select></label><div class="stat-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px"><div class="stat-card"><small>Total Kasbon</small><strong id="salaryTotalAdvance">Rp0</strong></div><div class="stat-card orange"><small>Sisa Kasbon</small><strong id="salaryBalance">Rp0</strong></div></div><p id="salaryBalanceStatus" class="muted mini"></p><h3>Catat Kasbon Baru</h3><form id="advanceForm"><label>Nominal kasbon<input id="advanceAmount" type="number" min="1" step="1" required placeholder="Contoh: 50000"></label><label>Keterangan<input id="advanceNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="advanceSave">Simpan Kasbon</button></form><p id="advanceStatus" role="status"></p></div>
@@ -119,6 +122,7 @@ body.dark-mode .report-filters button:not(.active){background:#334155;color:#fff
 </section>
 </section></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 "use strict";
 const URL_SUPABASE="https://ptdvctefkoretlehxaay.supabase.co";
@@ -159,15 +163,16 @@ let currentView=null;
 function showView(view){
  if(!profile)return;
  const owner=profile.role==="owner";
- const valid=["report","transaction","recent","products","management","pin","attendance","salary"];
+ const valid=["report","transaction","recent","products","management","pin","attendance","salary","export"];
  if(!valid.includes(view)||( !owner && !["transaction","recent"].includes(view)))view=owner?"report":"transaction";
  currentView=view;
- const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel",salary:"salaryPanel"};
+ const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel",salary:"salaryPanel",export:"exportPanel"};
  Object.entries(sections).forEach(([name,id])=>{$(id).hidden=name!==view});
  document.querySelectorAll("#topNav [data-view]").forEach(b=>{b.classList.toggle("active",b.dataset.view===view);b.setAttribute("aria-current",b.dataset.view===view?"page":"false")});
  $("branchToolbar").hidden=!["transaction","recent"].includes(view);
  if(view==="report"){loadReportPeriod();}
  if(view==="attendance")loadAttendance();
+  if(view==="export")initExcelExport();
   if(view==="salary")loadSalaryScreen();
  if(view==="recent")loadSales().catch(e=>message(e.message,true));
  window.scrollTo({top:0,behavior:"instant"});
@@ -543,4 +548,55 @@ $("salaryForm").addEventListener("submit",async e=>{
 });
 
 updateCash();start();
+
+// === OWNER EXCEL EXPORT (data diambil melalui RPC owner-only) ===
+function excelWibToday(){return jakartaDate().toISOString().slice(0,10)}
+function excelDateShift(iso,days){const d=new Date(iso+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
+function updateExcelPeriod(){
+ const today=excelWibToday(),period=$('excelPeriod').value;
+ if(period==='custom')return;
+ $('excelEnd').value=today;
+ $('excelStart').value=period==='seven'?excelDateShift(today,-6):period==='month'?today.slice(0,7)+'-01':today;
+}
+function initExcelExport(){
+ if(profile?.role!=='owner')return;
+ const sel=$('excelBranch'),old=sel.value;
+ sel.innerHTML='<option value="">Semua Cabang</option>'+branches.map(b=>`<option value="${escapeHTML(b.id)}">${escapeHTML(b.name)}</option>`).join('');
+ if(branches.some(b=>b.id===old))sel.value=old;
+ if(!$('excelStart').value||!$('excelEnd').value)updateExcelPeriod();
+}
+$('excelPeriod').addEventListener('change',updateExcelPeriod);
+$('excelExportForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(profile?.role!=='owner')return;
+ const start=$('excelStart').value,end=$('excelEnd').value,branch=$('excelBranch').value||null;
+ const status=$('excelStatus'),btn=$('excelDownload');status.className='muted';status.textContent='';
+ if(!start||!end||end<start){status.className='error';status.textContent='Periksa tanggal mulai dan akhir.';return;}
+ if(!window.XLSX){status.className='error';status.textContent='Library Excel belum termuat. Periksa internet dan muat ulang.';return;}
+ btn.disabled=true;status.textContent='Mengambil data Supabase dan membuat Excel...';
+ try{
+  const data=await check(await sb.rpc('owner_export_excel_data',{p_start:start,p_end:end,p_branch_id:branch}));
+  if(!data||!Array.isArray(data.penjualan))throw Error('Data ekspor tidak valid.');
+  const paid=data.penjualan.filter(x=>x.status==='completed');
+  const total=paid.reduce((n,x)=>n+Number(x.total||0),0);
+  const cash=paid.filter(x=>x.metode==='tunai').reduce((n,x)=>n+Number(x.total||0),0);
+  const noncash=paid.filter(x=>x.metode==='non_tunai').reduce((n,x)=>n+Number(x.total||0),0);
+  const wb=XLSX.utils.book_new();
+  function addSheet(name,headers,rows){
+   const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+   ws['!cols']=headers.map((h,i)=>({wch:Math.min(38,Math.max(14,String(h).length+4,...rows.slice(0,100).map(r=>String(r[i]??'').length+2)))}));
+   XLSX.utils.book_append_sheet(wb,ws,name);
+  }
+  addSheet('Ringkasan',['Keterangan','Nilai'],[['Periode Mulai',start],['Periode Akhir',end],['Cabang',branch?branches.find(b=>b.id===branch)?.name||branch:'Semua Cabang'],['Transaksi Selesai',paid.length],['Omzet',total],['Tunai',cash],['Non Tunai',noncash],['Jumlah Absensi',data.absensi.length],['Jumlah Pembayaran Gaji',data.gaji.length],['Jumlah Pengambilan Kasbon',data.kasbon.length]]);
+  addSheet('Penjualan',['ID Transaksi','Tanggal WIB','Cabang','Kasir','Metode','Status','Total'],data.penjualan.map(x=>[x.id,x.tanggal,x.cabang,x.kasir,x.metode,x.status,Number(x.total||0)]));
+  addSheet('Detail Produk',['Tanggal WIB','Cabang','Kasir','ID Transaksi','Produk','QTY','Harga Satuan','Subtotal'],data.produk.map(x=>[x.tanggal,x.cabang,x.kasir,x.transaksi,x.produk,Number(x.qty||0),Number(x.harga||0),Number(x.subtotal||0)]));
+  addSheet('Absensi',['Tanggal','Cabang','Kasir','Masuk WIB','Pulang WIB'],data.absensi.map(x=>[x.tanggal,x.cabang,x.kasir,x.masuk,x.pulang]));
+  addSheet('Gaji',['Tanggal Bayar WIB','Kasir','Cabang Saat Ini','Periode Mulai','Periode Akhir','Hari','Tarif Harian','Gaji Kotor','Potongan Kasbon','Gaji Bersih','Dibayar Oleh'],data.gaji.map(x=>[x.dibayar,x.kasir,x.cabang,x.mulai,x.akhir,Number(x.hari||0),Number(x.tarif||0),Number(x.kotor||0),Number(x.potongan||0),Number(x.bersih||0),x.dibayar_oleh]));
+  addSheet('Kasbon',['Tanggal WIB','Kasir','Cabang Saat Ini','Nominal','Keterangan','Dicatat Oleh'],data.kasbon.map(x=>[x.tanggal,x.kasir,x.cabang,Number(x.nominal||0),x.catatan,x.dicatat_oleh]));
+  const suffix=branch?'_Cabang_'+String(branch).slice(0,8):'_Semua_Cabang';
+  XLSX.writeFile(wb,'INU_Chicken_'+start+'_sd_'+end+suffix+'.xlsx');
+  status.className='ok';status.textContent='Excel berhasil dibuat. Periksa folder unduhan browser.';
+ }catch(err){status.className='error';status.textContent='Ekspor gagal: '+String(err?.message||err);await logError(err,'excel-export')}
+ finally{btn.disabled=false}
+});
+
 </script></body></html>
