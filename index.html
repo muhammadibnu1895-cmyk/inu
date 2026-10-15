@@ -95,6 +95,10 @@ body.dark-mode .attendance-chip{background:#1f2937;border-color:#475569}
 .branch-chart-bar{width:62px;max-height:230px;background:linear-gradient(180deg,#fb923c,#f05a09);border-radius:9px 9px 0 0;flex-shrink:0}
 .branch-chart-name{font-size:12px;font-weight:650;line-height:1.2;max-width:105px;min-height:31px;overflow-wrap:anywhere;color:#475569}
 body.dark-mode .branch-chart-value,body.dark-mode .branch-chart-name{color:#f1f5f9}
+/* Antrean transaksi offline */
+.offline-strip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;border:1px solid #fed7aa;border-radius:12px;background:#fff7ed;margin:10px 0;font-size:13px}
+.offline-strip button{padding:7px 11px;font-size:12px}.offline-strip strong{color:#9a3412}
+body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 </style></head>
 <body><header id="appHeader"><div class="brand"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken"><div><h1>Inu Chicken POS</h1><span class="role-chip" id="roleTop">—</span></div></div><div class="header-actions"><span id="headerBranch" class="header-branch" hidden></span><button type="button" id="headerReload" class="icon-action" aria-label="Muat ulang" title="Muat ulang">↻</button><button type="button" id="themeToggle" class="icon-action" aria-label="Mode malam" title="Mode malam">☾</button><button type="button" id="headerLogout" class="icon-action exit" aria-label="Keluar" title="Keluar">⏻</button></div><span id="identity" hidden></span></header>
 <main><section id="login" class="panel"><div class="login-mark"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken" onerror="this.style.display='none';this.parentNode.textContent='🍗'"></div><h2>Selamat Datang</h2><p class="login-subtitle">INU CHICKEN POS</p><form id="pinLoginForm"><label>PIN 6 digit<input id="loginPin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" required></label><button id="pinLoginBtn">Masuk dengan PIN</button></form><details><summary>Login cadangan Owner (trial)</summary><form id="loginForm"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button id="loginBtn">Masuk</button></form><p class="muted small">Gunakan akun yang telah dibuat di Supabase Auth dan memiliki profil aktif.</p></details></section>
@@ -111,7 +115,7 @@ body.dark-mode .branch-chart-value,body.dark-mode .branch-chart-name{color:#f1f5
 <span class="nav-spacer"></span><button type="button" id="reload" class="secondary" hidden>↻ Muat Ulang</button><button type="button" id="logout" class="nav-logout" hidden>Keluar</button>
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
-<div id="notice" role="status" aria-live="polite"></div>
+<div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineSync" class="secondary">Sinkronkan</button><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>📊 Report & Analisa Penjualan</h2><p class="muted">Ringkasan transaksi yang dapat diakses Owner</p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button></div>
 <div class="stat-grid"><div class="stat-card orange"><small>Total Penjualan</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
 <div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
@@ -125,7 +129,7 @@ body.dark-mode .branch-chart-value,body.dark-mode .branch-chart-name{color:#f1f5
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
-<p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Jika koneksi terputus, jangan buat keranjang baru sebelum status transaksi dipastikan. Tombol Bayar akan mengulang ID permintaan yang sama.</p></section></div>
+<p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Transaksi disimpan dahulu di perangkat, lalu disinkronkan. Jangan hapus data browser sebelum antrean kosong.</p></section></div>
 </div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang otomatis saat Kasir klik Keluar. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
 <section id="exportPanel" class="panel" hidden><h2>💾 Ekspor Excel</h2><p class="muted">Unduh satu file Excel dengan 6 sheet: Ringkasan, Penjualan, Detail Produk, Absensi, Gaji, dan Kasbon. Khusus Owner.</p>
@@ -173,6 +177,70 @@ async function logError(e,modul="app",level="error"){
   }catch(x){console.warn("Log tidak tersimpan",x)}
 }
 function escapeHTML(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+// Offline: setiap penjualan ditulis ke IndexedDB SEBELUM dikirim ke server.
+const OFFLINE_DB="inu-chicken-pos-offline-v1", OFFLINE_STORE="transactions";
+let offlineDbPromise=null,offlineSyncBusy=false,offlineTimer=null;
+function offlineDb(){
+ if(!('indexedDB' in window))return Promise.reject(Error('Browser tidak mendukung penyimpanan IndexedDB.'));
+ if(!offlineDbPromise)offlineDbPromise=new Promise((resolve,reject)=>{
+  const r=indexedDB.open(OFFLINE_DB,1);
+  r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(OFFLINE_STORE))db.createObjectStore(OFFLINE_STORE,{keyPath:'id'})};
+  r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error||Error('IndexedDB gagal dibuka'));
+ }).catch(e=>{offlineDbPromise=null;throw e});
+ return offlineDbPromise;
+}
+async function offlineStore(mode,handler){
+ const db=await offlineDb();return new Promise((resolve,reject)=>{
+  const tx=db.transaction(OFFLINE_STORE,mode),store=tx.objectStore(OFFLINE_STORE);
+  let result;try{const request=handler(store);if(request){request.onsuccess=()=>{result=request.result};request.onerror=()=>reject(request.error)}}catch(e){reject(e);return}
+  tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error||Error('Gagal menyimpan antrean'));tx.onabort=()=>reject(tx.error||Error('Penyimpanan dibatalkan'));
+ });
+}
+const offlinePut=item=>offlineStore('readwrite',s=>s.put(item));
+const offlineDelete=id=>offlineStore('readwrite',s=>s.delete(id));
+const offlineAll=()=>offlineStore('readonly',s=>s.getAll());
+async function offlineOwn(){return (await offlineAll()).filter(x=>x.cashier_id===user?.id).sort((a,b)=>a.sold_at.localeCompare(b.sold_at))}
+async function offlineRefresh(){
+ const strip=$('offlineStrip');strip.hidden=!user||!profile;if(strip.hidden)return;
+ try{
+  const all=await offlineAll(),own=all.filter(x=>x.cashier_id===user.id),blocked=own.filter(x=>x.error&&!x.retryable);
+  $('offlineStatus').textContent=navigator.onLine?'● Online':'● Offline';
+  $('offlineQueueCount').textContent=`${own.length} transaksi tertunda${blocked.length?' · '+blocked.length+' perlu diperiksa':''}`;
+  $('offlineSync').disabled=!own.length||offlineSyncBusy||!navigator.onLine;
+  $('offlineQueueList').innerHTML=own.length?own.map(x=>`<div class="mini" style="padding:8px 0;border-top:1px solid #fed7aa"><b>${escapeHTML(new Date(x.sold_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}))} WIB</b> · ${rupiah(x.total)} · ${x.payment_method==='tunai'?'Tunai':'QRIS'}<div>${x.error?'⚠ '+escapeHTML(x.error):'Menunggu sinkronisasi'}</div><code>${escapeHTML(x.id)}</code></div>`).join(''):'<span class="mini">Semua transaksi sudah tersinkron.</span>';
+ }catch(e){$('offlineStatus').textContent='⚠ Penyimpanan lokal bermasalah';$('offlineQueueCount').textContent=String(e.message)}
+}
+async function offlineSync(){
+ if(offlineSyncBusy||!navigator.onLine||!user||!profile)return;
+ offlineSyncBusy=true;await offlineRefresh();let changed=false;
+ try{
+  for(const item of await offlineOwn()){
+   if(!navigator.onLine||!user||item.cashier_id!==user.id)break;
+   if(item.error&&!item.retryable)continue;
+   try{
+    const args={p_items:item.items,p_payment_method:item.payment_method,p_request_id:item.id,p_branch_id:item.branch_id,p_sold_at:item.sold_at,p_cash_received:item.cash_received};
+    await check(await sb.rpc('create_sale_offline',args));
+    await offlineDelete(item.id);changed=true;
+   }catch(e){
+    const msg=String(e?.message||e).slice(0,220);
+    const network=/fetch|network|timeout|failed to fetch|load failed|offline|connection|jwt expired/i.test(msg);
+    await offlinePut({...item,error:network?'Koneksi atau sesi belum siap; akan dicoba lagi.':msg,retryable:network});
+    if(network)break;
+   }
+  }
+  if(changed){message('Transaksi offline berhasil disinkronkan.');loadSales().catch(()=>{});if(profile?.role==='owner')loadReportPeriod().catch(()=>{})}
+ }finally{offlineSyncBusy=false;await offlineRefresh()}
+}
+function offlineAutoStart(){
+ if(offlineTimer)clearInterval(offlineTimer);
+ offlineTimer=setInterval(()=>{if(user&&navigator.onLine)offlineSync().catch(console.warn);else offlineRefresh().catch(console.warn)},20000);
+ offlineRefresh().then(()=>{if(navigator.onLine)offlineSync().catch(console.warn)}).catch(console.warn);
+}
+window.addEventListener('online',()=>offlineSync().catch(console.warn));
+window.addEventListener('offline',()=>offlineRefresh().catch(console.warn));
+$('offlineSync').onclick=()=>offlineSync().catch(e=>message(e.message,true));
+$('offlineDetails').onclick=()=>{$('offlineQueueList').hidden=!$('offlineQueueList').hidden};
+
 function resetRequest(){pendingId=null}
 function cartTotal(){let n=0;for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(p)n+=Number(p.price)*qty}return n}
 function updateCash(){
@@ -314,7 +382,7 @@ async function loadProductAnalytics(){
  $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Produk di luar empat kategori tidak ditampilkan.";
 }
 
-function showLogin(){$("cashierAttendanceStatus").hidden=true;document.body.classList.remove("logged-in");currentView=null;user=null;profile=null;$("attendancePanel").hidden=true;$("ownerPinPanel").hidden=true;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
+function showLogin(){if(offlineTimer){clearInterval(offlineTimer);offlineTimer=null}$("offlineStrip").hidden=true;$("cashierAttendanceStatus").hidden=true;document.body.classList.remove("logged-in");currentView=null;user=null;profile=null;$("attendancePanel").hidden=true;$("ownerPinPanel").hidden=true;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
 async function check(res){if(res.error)throw res.error;return res.data}
 async function start(){
  const {data:{session}}=await sb.auth.getSession();
@@ -330,7 +398,7 @@ async function start(){
   $("management").hidden=true;
   $("attendancePanel").hidden=true;$("attendanceActions").hidden=true;
   $("transactionArea").hidden=true;
-  await load();showView(profile.role==="owner"?"report":"transaction");if(profile.role==="kasir")await refreshCashierAttendanceStatus();
+  await load();showView(profile.role==="owner"?"report":"transaction");offlineAutoStart();if(profile.role==="kasir")await refreshCashierAttendanceStatus();
  }catch(e){showLogin();$("login").insertAdjacentHTML("beforeend",'<p class="error" id="authError"></p>');$("authError").textContent=e.message}
 }
 async function load(){
@@ -407,6 +475,9 @@ $("cashierPinUpdateForm").addEventListener("submit",async e=>{
 $("logout").onclick=async()=>{
  const btn=$("logout");if(btn.disabled)return;btn.disabled=true;
  try{
+  if(profile?.role==='kasir'&&(await offlineOwn()).length){
+   if(!confirm('Masih ada transaksi offline belum sinkron. Data tetap di perangkat dan hanya Kasir ini yang bisa menyinkronkan saat login kembali. Tetap keluar?'))return;
+  }
   if(profile?.role==="kasir"){
    // Catat pulang di server SEBELUM sesi Supabase dihapus.
    const rows=await check(await sb.rpc("attendance_history",{p_days:1}));
@@ -438,10 +509,19 @@ $("pay").onclick=async()=>{
  if(!pendingId)pendingId=crypto.randomUUID();
  const args={p_items:[...cart].map(([product_id,qty])=>({product_id,qty})),p_payment_method:$("method").value,p_request_id:pendingId,p_branch_id:$("branch").value};
  try{
-  const saleId=await check(await sb.rpc("create_sale",args));
-  message("Transaksi tersimpan. ID: "+saleId);
-  cart.clear();resetRequest();$("cashReceived").value="";await loadSales();await load(); 
- }catch(e){message("Transaksi belum dapat dikonfirmasi: "+e.message+". Tekan Simpan Transaksi lagi untuk mengulang permintaan yang sama.",true)}
+  const record={id:pendingId,cashier_id:user.id,branch_id:args.p_branch_id,
+   sold_at:new Date().toISOString(),payment_method:args.p_payment_method,
+   cash_received:args.p_payment_method==='tunai'?Number($('cashReceived').value):null,
+   total:cartTotal(),items:[...cart].map(([product_id,qty])=>({product_id,qty,unit_price:Number(products.find(p=>p.id===product_id).price)})),
+   retryable:true,error:null};
+  const existing=(await offlineAll()).find(x=>x.id===record.id);
+  if(existing&&JSON.stringify(existing.items)!==JSON.stringify(record.items))throw Error('ID transaksi sudah digunakan; muat ulang aplikasi sebelum mencoba lagi.');
+  if(!existing)await offlinePut(record);
+  cart.clear();resetRequest();$('cashReceived').value='';
+  message('Transaksi aman di perangkat. '+(navigator.onLine?'Mengirim ke server...':'Menunggu internet untuk sinkronisasi.'));
+  await offlineRefresh();
+  if(navigator.onLine)await offlineSync();
+ }catch(e){message('Gagal menyimpan transaksi di perangkat: '+e.message+'. Keranjang tidak dihapus bila penyimpanan gagal.',true)}
  finally{busy=false;renderCart()}
 };
 $("productForm").onsubmit=async e=>{e.preventDefault();if(profile?.role!=="owner")return;try{await check(await sb.from("products").insert({sku:"INU-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),name:$("productName").value.trim(),price:Number($("price").value)}));$("productForm").reset();message("Produk ditambahkan");await load()}catch(err){message(err.message,true)}};
