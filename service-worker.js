@@ -1,5 +1,5 @@
 /* Inu Chicken POS V10 PWA: cache hanya file aplikasi & CDN library, bukan API Supabase */
-const CACHE = 'inu-pos-v10-pwa-4';
+const CACHE = 'inu-pos-v10-pwa-import-20261016';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const CDN_HOSTS = new Set(['cdn.jsdelivr.net']);
 self.addEventListener('install', event => {
