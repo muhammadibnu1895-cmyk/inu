@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Inu Chicken POS</title><link rel="manifest" href="https://muhammadibnu1895-cmyk.github.io/inu/manifest.webmanifest"><meta name="theme-color" content="#f05a09"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="./icon-192.png">
+<title>Inu Chicken POS V10 | Supabase</title><link rel="manifest" href="https://muhammadibnu1895-cmyk.github.io/inu/manifest.webmanifest"><meta name="theme-color" content="#f05a09"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 :root{font-family:system-ui,Arial,sans-serif;color:#19202b;background:#f6f7fb}*{box-sizing:border-box}body{margin:0}header{background:#ae1622;color:white;padding:17px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}h1{margin:0;font-size:21px}main{max-width:1200px;margin:25px auto;padding:0 16px}.panel{background:white;border:1px solid #e3e6eb;border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 3px 16px #1b23300a}input,select,button{font:inherit;padding:11px;border-radius:9px;border:1px solid #cbd2dd}button{background:#ae1622;color:white;border:0;cursor:pointer;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#eef0f4;color:#222}.grid{display:grid;grid-template-columns:1.3fr .85fr;gap:18px}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.product{border:1px solid #e3e6eb;background:#fff;color:#222;text-align:left;min-height:85px}.product b{display:block}.product small{display:block;color:#656c78;margin-top:7px}.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.flex>*{min-width:0}.grow{flex:1}.muted{color:#6a7380}.error{color:#b91c1c}.ok{color:#137344}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e7e9ee;padding:10px 5px;text-align:left}td:last-child,th:last-child{text-align:right}.qty{width:68px}.total{font-size:25px;font-weight:800}#app{display:none}#login{max-width:440px;margin:55px auto}#login input{width:100%;margin:7px 0 14px}#login button{width:100%}#notice{margin:12px 0;min-height:24px}.small{font-size:12px}@media(max-width:780px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
 .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px}.admin-grid form{display:grid;gap:10px}.admin-grid input,.admin-grid select{width:100%}.admin-grid label{display:grid;gap:5px}.tag{background:#f4e7e8;border-radius:30px;padding:4px 9px;font-size:12px}.log-row{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.log-row code{font-size:12px}.mini{font-size:13px}.hint{background:#fff8e6;padding:12px;border-radius:9px;color:#78500a}#adminTabs button{background:#eee;color:#333}#adminTabs button.active{background:#ae1622;color:white}@media(max-width:780px){.admin-grid{grid-template-columns:1fr}}
@@ -111,7 +111,7 @@ body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 <button type="button" data-view="pin" data-owner-only>🔑 Pengaturan PIN</button>
 <button type="button" data-view="attendance" data-owner-only>🕒 Absensi</button>
 <button type="button" data-view="salary" data-owner-only>💰 Gaji &amp; Kasbon</button>
-<button type="button" data-view="export" data-owner-only>💾 Ekspor Excel</button>
+<button type="button" data-view="export" data-owner-only>💾 Ekspor Excel</button><button type="button" data-view="import" data-owner-only>📥 Import Penjualan</button>
 <span class="nav-spacer"></span><button type="button" id="reload" class="secondary" hidden>↻ Muat Ulang</button><button type="button" id="logout" class="nav-logout" hidden>Keluar</button>
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
@@ -139,10 +139,11 @@ body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 <div class="admin-grid"><div><h3>Kasir &amp; Saldo Kasbon</h3><label>Kasir<select id="salaryCashier" style="width:100%"><option value="">Pilih Kasir</option></select></label><div class="stat-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px"><div class="stat-card"><small>Total Kasbon</small><strong id="salaryTotalAdvance">Rp0</strong></div><div class="stat-card orange"><small>Sisa Kasbon</small><strong id="salaryBalance">Rp0</strong></div></div><p id="salaryBalanceStatus" class="muted mini"></p><h3>Catat Kasbon Baru</h3><form id="advanceForm"><label>Nominal kasbon<input id="advanceAmount" type="number" min="1" step="1" required placeholder="Contoh: 50000"></label><label>Keterangan<input id="advanceNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="advanceSave">Simpan Kasbon</button></form><p id="advanceStatus" role="status"></p></div>
 <div><h3>Pembayaran Gaji</h3><form id="salaryForm"><label>Dari tanggal<input id="salaryStart" type="date" required></label><label>Sampai tanggal<input id="salaryEnd" type="date" required></label><label>Potongan kasbon oleh Owner<input id="salaryDeduction" type="number" min="0" step="1" value="0" required></label><button type="button" id="salaryPreviewBtn" class="secondary">Hitung Preview Gaji</button><div id="salaryPreviewResult" class="hint mini" hidden></div><button type="submit" id="salaryPayBtn" disabled>Konfirmasi Sudah Bayar Gaji</button></form><p id="salaryPayStatus" role="status"></p><p class="muted mini">Tombol pembayaran hanya mencatat gaji yang benar-benar sudah diserahkan. Tanggal yang sudah dibayar tidak akan dihitung ulang.</p></div></div>
 </section>
+<section id="importPanel" class="panel" hidden><h2>📥 Import Penjualan Lama (Owner)</h2><p class="muted">Hanya membaca sheet <b>Penjualan</b> dari Excel lama. Preview dulu; data baru dikirim setelah konfirmasi. ID lama mencegah import ganda.</p><div class="admin-grid"><label>File Excel (.xlsx)<input type="file" id="importFile" accept=".xlsx,.xls"></label><label>Masukkan ke cabang<select id="importBranch"></select></label></div><p id="importStatus" role="status" aria-live="polite"></p><div id="importPreview" hidden><p id="importSummary"></p><div style="max-height:260px;overflow:auto"><table><thead><tr><th>ID Lama</th><th>Waktu WIB</th><th>Item</th><th>Total</th></tr></thead><tbody id="importRows"></tbody></table></div><p class="hint mini">Import memakai kasir Owner sebagai pencatat historis karena Excel tidak berisi identitas kasir atau cabang. Pilih cabang yang benar sebelum impor. Riwayat asli tidak diubah.</p><button type="button" id="importConfirm">Konfirmasi Import Penjualan</button></div></section>
 <section id="ownerPinPanel" class="panel" hidden><h2>Pengaturan PIN Owner</h2><p class="muted small">Owner dapat membuat atau mengganti PIN 6 digit di sini. Jangan gunakan PIN yang mudah ditebak.</p><form id="ownerPinForm" class="flex"><label>PIN baru (6 digit)<input id="ownerPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN<input id="ownerPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><button id="ownerPinSave" type="submit">Simpan PIN Owner</button></form><p id="ownerPinStatus" role="status" aria-live="polite"></p><p class="hint mini">PIN Owner disimpan melalui fungsi database yang sudah ada. Login cadangan hanya disembunyikan dari tampilan.</p><div class="panel" style="margin-top:18px"><h3>Ganti PIN Kasir</h3><p class="muted small">Hanya Owner aktif yang dapat mengganti PIN Kasir.</p><form id="cashierPinUpdateForm" class="admin-grid"><label>Kasir<select id="pinCashierSelect" required><option value="">Pilih Kasir</option></select></label><label>PIN baru (6 digit)<input id="pinCashierNew" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" required></label><label>Ulangi PIN baru<input id="pinCashierConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="new-password" required></label><div><button type="submit" id="pinCashierSave">Simpan PIN Kasir</button></div></form><p id="pinCashierStatus" role="status" aria-live="polite"></p></div></section>
 <section id="ownerPanel" class="panel" hidden><h2>Master Produk (Owner)</h2><form id="productForm" class="flex"><input id="productName" placeholder="Nama produk" required><input id="price" type="number" min="0" step="0.01" placeholder="Harga" required><button>Tambah produk</button></form><p class="muted small">SKU dibuat otomatis dengan kode unik saat produk ditambahkan. Harga yang dipakai transaksi ditentukan oleh database, bukan keranjang browser.</p></section>
 <section id="management" class="panel" hidden>
-<h2>Pengaturan Owner </h2><p class="muted mini">Akun Kasir, cabang, penempatan Kasir, dan log error. Hanya untuk Owner.</p>
+<h2>Pengaturan Owner <span class="tag">Trial V10</span></h2><p class="muted mini">Akun Kasir, cabang, penempatan Kasir, dan log error. Hanya untuk Owner.</p>
 <div id="adminTabs" class="flex"><button type="button" class="active" data-tab="cashiers">Kasir</button><button type="button" data-tab="branches">Cabang</button><button type="button" data-tab="errors">Error Log</button></div>
 <div id="tab-cashiers"><div class="admin-grid"><div><h3>Tambah Kasir</h3><form id="cashierForm"><label>Nama Kasir<input id="cashierName" required maxlength="100"></label><label>PIN Kasir (6 digit)<input id="cashierPin" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Konfirmasi PIN<input id="cashierPinConfirm" type="password" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" required></label><label>Cabang<select id="cashierBranch" required></select></label><button type="submit">Buat Akun Kasir</button></form><p class="hint mini">PIN setiap kasir harus unik. Memerlukan Edge Function <code>owner-create-cashier-pin</code> di server.</p></div><div><h3>Daftar & Assign Kasir</h3><div class="cashier-toolbar"><input id="cashierSearch" type="search" placeholder="Cari nama kasir..." aria-label="Cari nama kasir"><select id="cashierStatusFilter" aria-label="Filter status"><option value="all">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></div><div id="cashierCount" class="muted mini"></div><div id="cashierList" class="mini">Memuat...</div><div class="cashier-pager"><span id="cashierPageInfo" class="muted mini"></span><div class="flex"><button type="button" id="cashierPrev" class="secondary">←</button><button type="button" id="cashierNext" class="secondary">→</button></div></div></div></div></div>
 <div id="tab-branches" hidden><div class="admin-grid"><div><h3>Tambah Cabang</h3><form id="branchForm"><label>Kode cabang<input id="branchCode" required maxlength="30" placeholder="INU002"></label><label>Nama cabang<input id="branchName" required maxlength="120"></label><button type="submit">Simpan Cabang</button></form></div><div><h3>Daftar Cabang</h3><div class="cashier-toolbar"><input id="branchSearch" type="search" placeholder="Cari kode atau nama cabang..." aria-label="Cari cabang"><select id="branchStatusFilter" aria-label="Filter status cabang"><option value="all">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></div><div id="branchCount" class="muted mini"></div><div id="branchList" class="mini"></div><div class="cashier-pager"><span id="branchPageInfo" class="muted mini"></span><div class="flex"><button type="button" id="branchPrev" class="secondary">←</button><button type="button" id="branchNext" class="secondary">→</button></div></div></div></div></div>
@@ -255,14 +256,15 @@ let currentView=null;
 function showView(view){
  if(!profile)return;
  const owner=profile.role==="owner";
- const valid=["report","transaction","recent","products","management","pin","attendance","salary","export"];
+ const valid=["report","transaction","recent","products","management","pin","attendance","salary","export","import"];
  if(!valid.includes(view)||( !owner && !["transaction","recent"].includes(view)))view=owner?"report":"transaction";
  currentView=view;
- const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel",salary:"salaryPanel",export:"exportPanel"};
+ const sections={report:"reportPanel",transaction:"transactionArea",recent:"recentPanel",products:"ownerPanel",management:"management",pin:"ownerPinPanel",attendance:"attendancePanel",salary:"salaryPanel",export:"exportPanel",import:"importPanel"};
  Object.entries(sections).forEach(([name,id])=>{$(id).hidden=name!==view});
  document.querySelectorAll("#topNav [data-view]").forEach(b=>{b.classList.toggle("active",b.dataset.view===view);b.setAttribute("aria-current",b.dataset.view===view?"page":"false")});
  $("branchToolbar").hidden=profile.role==="kasir"||!["transaction","recent"].includes(view);
  if(view==="report"){loadReportPeriod();}
+  if(view==="import")initImportPenjualan();
  if(view==="attendance")loadAttendance();
   if(view==="export")initExcelExport();
   if(view==="salary")loadSalaryScreen();
@@ -781,6 +783,80 @@ $('excelExportForm').addEventListener('submit',async e=>{
   status.className='ok';status.textContent='Excel berhasil dibuat. Periksa folder unduhan browser.';
  }catch(err){status.className='error';status.textContent='Ekspor gagal: '+String(err?.message||err);await logError(err,'excel-export')}
  finally{btn.disabled=false}
+});
+
+
+// Import historis hanya Owner. Tidak memakai antrean offline kasir.
+let legacyImportRows=[],legacyImportBusy=false;
+function initImportPenjualan(){
+ const sel=$('importBranch'),old=sel.value;
+ sel.innerHTML=branches.map(b=>`<option value="${escapeHTML(b.id)}">${escapeHTML(b.name)}</option>`).join('');
+ if(branches.some(b=>b.id===old))sel.value=old;
+}
+function legacyExcelDate(value, date1904){
+ if(value instanceof Date && !isNaN(value))return value.toISOString();
+ if(typeof value==='number'){
+  const d=XLSX.SSF.parse_date_code(value,{date1904:!!date1904});
+  if(!d)return null;
+  const iso=[d.y,String(d.m).padStart(2,'0'),String(d.d).padStart(2,'0')].join('-')+'T'+[d.H,d.M,d.S].map(n=>String(n).padStart(2,'0')).join(':')+'+07:00';
+  return new Date(iso).toISOString();
+ }
+ if(typeof value==='string'){
+  const s=value.trim();
+  if(/^\d{4}-\d\d-\d\d[T ]\d\d:\d\d/.test(s))return new Date(s.replace(' ','T')+(s.match(/[zZ]|[+-]\d\d:\d\d$/)?'':'+07:00')).toISOString();
+ }
+ return null;
+}
+$('importFile').addEventListener('change',async e=>{
+ legacyImportRows=[];$('importPreview').hidden=true;
+ const f=e.target.files?.[0];if(!f)return;
+ const status=$('importStatus');status.className='muted';status.textContent='Memeriksa file...';
+ try{
+  if(profile?.role!=='owner')throw Error('Hanya Owner dapat mengimpor.');
+  if(f.size>12*1024*1024)throw Error('File melebihi 12 MB.');
+  const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:false});
+  const sheet=wb.Sheets['Penjualan'];if(!sheet)throw Error('Sheet Penjualan tidak ditemukan.');
+  const rows=XLSX.utils.sheet_to_json(sheet,{header:1,raw:true,defval:''});
+  const headers=['ID Transaksi','Tanggal & Waktu','Nama Produk','Jumlah','Harga Satuan','Total Harga','Metode Pembayaran'];
+  if(headers.some((h,i)=>String(rows[0]?.[i]||'').trim()!==h))throw Error('Kolom sheet Penjualan tidak sesuai format Excel lama.');
+  const groups=new Map();let itemCount=0;
+  for(let i=1;i<rows.length;i++){
+   const r=rows[i];if(!r||r.every(x=>x===''||x==null))continue;
+   const id=String(r[0]).trim(),soldAt=legacyExcelDate(r[1],wb.Workbook?.WBProps?.date1904),name=String(r[2]).trim(),qty=Number(r[3]),price=Number(r[4]),subtotal=Number(r[5]);
+   const method=String(r[6]).trim().toLowerCase();
+   if(!id||id.length>120||!soldAt||!name||name.length>200||!Number.isInteger(qty)||qty<1||qty>999||!Number.isFinite(price)||price<0||!Number.isFinite(subtotal)||subtotal<0||Math.abs(qty*price-subtotal)>.01||!['tunai','qris','non_tunai'].includes(method))throw Error('Data tidak valid pada baris Excel '+(i+1));
+   if(new Date(soldAt)>new Date(Date.now()+300000))throw Error('Tanggal transaksi di masa depan pada baris '+(i+1));
+   const payment=method==='tunai'?'tunai':'non_tunai';
+   if(!groups.has(id))groups.set(id,{external_id:id,sold_at:soldAt,payment_method:payment,items:[]});
+   const g=groups.get(id);
+   if(g.sold_at!==soldAt||g.payment_method!==payment)throw Error('ID '+id+' punya tanggal atau metode berbeda.');
+   g.items.push({product_name:name,qty,unit_price:price,subtotal});itemCount++;
+  }
+  legacyImportRows=[...groups.values()];
+  if(!legacyImportRows.length)throw Error('Tidak ada transaksi untuk diimpor.');
+  if(legacyImportRows.some(g=>g.items.length>100))throw Error('Ada transaksi dengan lebih dari 100 item.');
+  $('importSummary').textContent=`${legacyImportRows.length} transaksi / ${itemCount} baris produk. Total ${rupiah(legacyImportRows.reduce((n,g)=>n+g.items.reduce((a,x)=>a+x.subtotal,0),0))}.`;
+  $('importRows').innerHTML=legacyImportRows.slice(0,15).map(g=>`<tr><td>${escapeHTML(g.external_id)}</td><td>${escapeHTML(new Date(g.sold_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}))}</td><td>${g.items.length}</td><td>${rupiah(g.items.reduce((n,x)=>n+x.subtotal,0))}</td></tr>`).join('');
+  $('importPreview').hidden=false;status.textContent='Preview siap. Belum ada data dikirim ke database.';
+ }catch(err){status.className='error';status.textContent=String(err.message||err)}
+});
+$('importConfirm').addEventListener('click',async()=>{
+ if(legacyImportBusy||!legacyImportRows.length||profile?.role!=='owner')return;
+ const branchId=$('importBranch').value;if(!branchId){$('importStatus').textContent='Pilih cabang dahulu.';return}
+ if(!confirm('Import '+legacyImportRows.length+' transaksi lama ke cabang yang dipilih? Tindakan ini akan menambah laporan historis.'))return;
+ legacyImportBusy=true;$('importConfirm').disabled=true;
+ const status=$('importStatus');let inserted=0,skipped=0;
+ try{
+  for(let i=0;i<legacyImportRows.length;i++){
+   const row=legacyImportRows[i];
+   const res=await check(await sb.rpc('owner_import_legacy_sale',{p_external_id:row.external_id,p_branch_id:branchId,p_sold_at:row.sold_at,p_payment_method:row.payment_method,p_items:row.items}));
+   if(res==='inserted')inserted++;else if(res==='skipped')skipped++;else throw Error('Respons import tidak dikenal.');
+   status.textContent=`Memproses ${i+1}/${legacyImportRows.length} — baru ${inserted}, duplikat ${skipped}`;
+  }
+  status.className='ok';status.textContent=`Selesai: ${inserted} transaksi baru, ${skipped} dilewati (sudah ada).`;
+  legacyImportRows=[];$('importPreview').hidden=true;
+ }catch(err){status.className='error';status.textContent=`Terhenti: ${inserted} baru, ${skipped} duplikat. ${String(err.message||err)}. Import ulang file yang sama aman karena ID lama dicek.`}
+ finally{legacyImportBusy=false;$('importConfirm').disabled=false}
 });
 
 </script><script>
