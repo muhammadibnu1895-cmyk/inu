@@ -1,0 +1,25 @@
+{
+  "id": "https://muhammadibnu1895-cmyk.github.io/inu/",
+  "name": "Inu Chicken POS V10",
+  "short_name": "Inu POS",
+  "description": "Kasir Inu Chicken dengan transaksi offline dan sinkronisasi otomatis",
+  "start_url": "https://muhammadibnu1895-cmyk.github.io/inu/",
+  "scope": "https://muhammadibnu1895-cmyk.github.io/inu/",
+  "display": "standalone",
+  "background_color": "#c5161e",
+  "theme_color": "#c5161e",
+  "icons": [
+    {
+      "src": "https://muhammadibnu1895-cmyk.github.io/inu/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://muhammadibnu1895-cmyk.github.io/inu/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
