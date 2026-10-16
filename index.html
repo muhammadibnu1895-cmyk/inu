@@ -130,7 +130,7 @@ body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Transaksi disimpan dahulu di perangkat, lalu disinkronkan. Jangan hapus data browser sebelum antrean kosong.</p></section></div>
-</div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
+</div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><p id="salesReadStatus" class="muted small" role="status">Menunggu data penjualan...</p><button type="button" id="salesRefresh" class="secondary" style="margin-bottom:12px">↻ Muat Penjualan</button><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang otomatis saat Kasir klik Keluar. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
 <section id="exportPanel" class="panel" hidden><h2>💾 Ekspor Excel</h2><p class="muted">Unduh satu file Excel dengan 6 sheet: Ringkasan, Penjualan, Detail Produk, Absensi, Gaji, dan Kasbon. Khusus Owner.</p>
 <form id="excelExportForm" class="admin-grid"><label>Periode<select id="excelPeriod"><option value="today">Hari Ini</option><option value="seven">7 Hari Terakhir</option><option value="month">Bulan Ini</option><option value="custom">Tanggal Bebas</option></select></label><label>Cabang<select id="excelBranch"><option value="">Semua Cabang</option></select></label><label>Tanggal mulai<input type="date" id="excelStart" required></label><label>Tanggal akhir<input type="date" id="excelEnd" required></label><div><button type="submit" id="excelDownload">⬇ Unduh Excel (.xlsx)</button></div></form><p id="excelStatus" role="status" aria-live="polite"></p><p class="muted small">Tanggal memakai WIB. Gaji dan kasbon difilter berdasarkan tanggal pencatatan/pembayaran. Cabang gaji dan kasbon mengikuti penempatan Kasir saat ini, bukan riwayat perpindahan cabang. Ekspor bukan backup database.</p></section>
@@ -422,18 +422,40 @@ function renderCart(){
  $("cart").innerHTML=rows?`<table><tbody>${rows}</tbody></table>`:"<p class='muted'>Belum ada produk dipilih.</p>";
  $("total").textContent=rupiah(sum);updateCash();
 }
+let salesLoadSeq=0;
 async function loadSales(){
- let q=sb.from("sales").select("id,branch_id,sold_at,payment_method,total,status").order("sold_at",{ascending:false});
- if(profile.role==="kasir"){
-   const now=new Date(),fmt=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Jakarta",year:"numeric",month:"2-digit",day:"2-digit"}),date=fmt.format(now);
-   const start=new Date(date+"T00:00:00+07:00"),end=new Date(start.getTime()+86400000);
-   q=q.eq("cashier_id",user.id).gte("sold_at",start.toISOString()).lt("sold_at",end.toISOString());
- }else q=q.limit(100);
- const data=await check(await q);
- if(profile.role==="owner"&&currentView==="report")loadReportPeriod();
- // Detail produk diambil hanya saat dibuka, supaya daftar transaksi tetap ringan.
- $("sales").innerHTML=data.map(s=>`<tr><td>${new Date(s.sold_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"})} WIB</td><td>${escapeHTML(branches.find(b=>b.id===s.branch_id)?.name||"—")}</td><td>${escapeHTML(s.payment_method)}</td><td>${escapeHTML(s.status)}</td><td>${rupiah(s.total)}</td><td><button type="button" class="secondary" data-sale-detail="${escapeHTML(s.id)}" aria-expanded="false">Lihat Produk</button></td></tr><tr data-sale-detail-row="${escapeHTML(s.id)}" hidden><td colspan="6"><div class="sale-detail-content muted small">Klik Lihat Produk untuk memuat detail.</div></td></tr>`).join("")||"<tr><td colspan='6'>Belum ada penjualan.</td></tr>";
+ const seq=++salesLoadSeq, status=$("salesReadStatus");
+ status.textContent="Memuat transaksi dari Supabase...";
+ try{
+  let q=sb.from("sales").select("id,branch_id,sold_at,payment_method,total,status").order("sold_at",{ascending:false});
+  if(profile.role==="kasir"){
+   // Gunakan perhitungan WIB yang sama dengan halaman Report; jangan bergantung pada format locale en-CA.
+   const today=jakartaDate(),tomorrow=new Date(today);
+   tomorrow.setUTCDate(tomorrow.getUTCDate()+1);
+   const start=new Date(dateWIB(today)).toISOString(),end=new Date(dateWIB(tomorrow)).toISOString();
+   q=q.eq("cashier_id",user.id).gte("sold_at",start).lt("sold_at",end).limit(100);
+  }else q=q.limit(100);
+  const data=await check(await q);
+  if(seq!==salesLoadSeq)return;
+  if(profile.role==="owner"&&currentView==="report")loadReportPeriod();
+  let pending=[];
+  if(profile.role==="kasir"){
+   try{pending=await offlineOwn()}catch(err){console.warn("Antrean lokal tidak dapat dibaca",err)}
+  }
+  if(seq!==salesLoadSeq)return;
+  const pendingRows=pending.map(x=>`<tr><td>${escapeHTML(new Date(x.sold_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}))} WIB</td><td>${escapeHTML(branches.find(b=>b.id===x.branch_id)?.name||"—")}</td><td>${x.payment_method==="tunai"?"Tunai":"QRIS"}</td><td>⏳ Belum sinkron</td><td>${rupiah(x.total)}</td><td>${escapeHTML((x.items||[]).map(i=>`${i.qty} × ${products.find(p=>p.id===i.product_id)?.name||"Produk"}`).join(", "))}</td></tr>`).join("");
+  const remoteRows=data.map(s=>`<tr><td>${new Date(s.sold_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"})} WIB</td><td>${escapeHTML(branches.find(b=>b.id===s.branch_id)?.name||"—")}</td><td>${escapeHTML(s.payment_method==="non_tunai"?"QRIS":s.payment_method)}</td><td>${escapeHTML(s.status)}</td><td>${rupiah(s.total)}</td><td><button type="button" class="secondary" data-sale-detail="${escapeHTML(s.id)}" aria-expanded="false">Lihat Produk</button></td></tr><tr data-sale-detail-row="${escapeHTML(s.id)}" hidden><td colspan="6"><div class="sale-detail-content muted small">Klik Lihat Produk untuk memuat detail.</div></td></tr>`).join("");
+  $("sales").innerHTML=pendingRows+remoteRows||"<tr><td colspan='6'>Tidak ada penjualan yang terbaca untuk hari ini.</td></tr>";
+  status.textContent=`${data.length} transaksi tersinkron terbaca dari Supabase${profile.role==="kasir"?` · ${pending.length} pending di browser ini · Periode hari ini (WIB)`:""}.`;
+ }catch(e){
+  if(seq!==salesLoadSeq)return;
+  status.textContent="⚠ Gagal membaca penjualan dari Supabase: "+String(e?.message||e);
+  $("sales").innerHTML="<tr><td colspan='6'>Data gagal dimuat. Tekan Muat Penjualan untuk mencoba lagi.</td></tr>";
+  throw e;
+ }
 }
+$("salesRefresh").addEventListener("click",()=>loadSales().catch(e=>message("Penjualan Terakhir: "+e.message,true)));
+
 $("sales").addEventListener("click",async e=>{
  const btn=e.target.closest("[data-sale-detail]");if(!btn)return;
  const id=btn.dataset.saleDetail;
