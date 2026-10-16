@@ -115,7 +115,7 @@ body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 <span class="nav-spacer"></span><button type="button" id="reload" class="secondary" hidden>↻ Muat Ulang</button><button type="button" id="logout" class="nav-logout" hidden>Keluar</button>
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
-<div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineSync" class="secondary">Sinkronkan</button><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
+<div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>📊 Report & Analisa Penjualan</h2><p class="muted">Ringkasan transaksi yang dapat diakses Owner</p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button></div>
 <div class="stat-grid"><div class="stat-card orange"><small>Total Penjualan</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
 <div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
@@ -130,7 +130,7 @@ body.dark-mode .offline-strip{background:#3b2b20;border-color:#92400e}
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Transaksi disimpan dahulu di perangkat, lalu disinkronkan. Jangan hapus data browser sebelum antrean kosong.</p></section></div>
-</div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><p id="salesReadStatus" class="muted small" role="status">Menunggu data penjualan...</p><button type="button" id="salesRefresh" class="secondary" style="margin-bottom:12px">↻ Muat Penjualan</button><button type="button" id="salesDiagnostic" class="secondary" style="margin:0 0 12px 8px">🔎 Diagnosa Penjualan</button><pre id="salesDiagnosticResult" hidden style="white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f5f9;padding:12px;border-radius:10px;font-size:12px"></pre><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
+</div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><p id="salesReadStatus" class="muted small" role="status">Menunggu data penjualan...</p><button type="button" id="salesRefresh" class="secondary" style="margin-bottom:12px">↻ Muat Penjualan</button><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th></tr></thead><tbody id="sales"></tbody></table></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang otomatis saat Kasir klik Keluar. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
 <section id="exportPanel" class="panel" hidden><h2>💾 Ekspor Excel</h2><p class="muted">Unduh satu file Excel dengan 6 sheet: Ringkasan, Penjualan, Detail Produk, Absensi, Gaji, dan Kasbon. Khusus Owner.</p>
 <form id="excelExportForm" class="admin-grid"><label>Periode<select id="excelPeriod"><option value="today">Hari Ini</option><option value="seven">7 Hari Terakhir</option><option value="month">Bulan Ini</option><option value="custom">Tanggal Bebas</option></select></label><label>Cabang<select id="excelBranch"><option value="">Semua Cabang</option></select></label><label>Tanggal mulai<input type="date" id="excelStart" required></label><label>Tanggal akhir<input type="date" id="excelEnd" required></label><div><button type="submit" id="excelDownload">⬇ Unduh Excel (.xlsx)</button></div></form><p id="excelStatus" role="status" aria-live="polite"></p><p class="muted small">Tanggal memakai WIB. Gaji dan kasbon difilter berdasarkan tanggal pencatatan/pembayaran. Cabang gaji dan kasbon mengikuti penempatan Kasir saat ini, bukan riwayat perpindahan cabang. Ekspor bukan backup database.</p></section>
@@ -204,9 +204,8 @@ async function offlineRefresh(){
  const strip=$('offlineStrip');strip.hidden=!user||!profile;if(strip.hidden)return;
  try{
   const all=await offlineAll(),own=all.filter(x=>x.cashier_id===user.id),blocked=own.filter(x=>x.error&&!x.retryable);
-  $('offlineStatus').textContent=navigator.onLine?'● Online':'● Offline';
+  $('offlineStatus').textContent=!navigator.onLine?'● Offline · tersimpan di perangkat':offlineSyncBusy?'● Online · menyinkronkan otomatis...':own.length?'● Online · menunggu sinkronisasi otomatis':'● Online · semua tersinkron';
   $('offlineQueueCount').textContent=`${own.length} transaksi tertunda${blocked.length?' · '+blocked.length+' perlu diperiksa':''}`;
-  $('offlineSync').disabled=!own.length||offlineSyncBusy||!navigator.onLine;
   $('offlineQueueList').innerHTML=own.length?own.map(x=>`<div class="mini" style="padding:8px 0;border-top:1px solid #fed7aa"><b>${escapeHTML(new Date(x.sold_at).toLocaleString('id-ID',{timeZone:'Asia/Jakarta'}))} WIB</b> · ${rupiah(x.total)} · ${x.payment_method==='tunai'?'Tunai':'QRIS'}<div>${x.error?'⚠ '+escapeHTML(x.error):'Menunggu sinkronisasi'}</div><code>${escapeHTML(x.id)}</code></div>`).join(''):'<span class="mini">Semua transaksi sudah tersinkron.</span>';
  }catch(e){$('offlineStatus').textContent='⚠ Penyimpanan lokal bermasalah';$('offlineQueueCount').textContent=String(e.message)}
 }
@@ -233,12 +232,13 @@ async function offlineSync(){
 }
 function offlineAutoStart(){
  if(offlineTimer)clearInterval(offlineTimer);
- offlineTimer=setInterval(()=>{if(user&&navigator.onLine)offlineSync().catch(console.warn);else offlineRefresh().catch(console.warn)},20000);
+ offlineTimer=setInterval(()=>{if(user&&navigator.onLine)offlineSync().catch(console.warn);else offlineRefresh().catch(console.warn)},15000);
  offlineRefresh().then(()=>{if(navigator.onLine)offlineSync().catch(console.warn)}).catch(console.warn);
 }
 window.addEventListener('online',()=>offlineSync().catch(console.warn));
 window.addEventListener('offline',()=>offlineRefresh().catch(console.warn));
-$('offlineSync').onclick=()=>offlineSync().catch(e=>message(e.message,true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&user&&navigator.onLine)offlineSync().catch(console.warn)});
+window.addEventListener('focus',()=>{if(user&&navigator.onLine)offlineSync().catch(console.warn)});
 $('offlineDetails').onclick=()=>{$('offlineQueueList').hidden=!$('offlineQueueList').hidden};
 
 function resetRequest(){pendingId=null}
@@ -455,38 +455,6 @@ async function loadSales(){
  }
 }
 $("salesRefresh").addEventListener("click",()=>loadSales().catch(e=>message("Penjualan Terakhir: "+e.message,true)));
-// Diagnostik baca-saja; tidak menampilkan token, PIN, atau email.
-$("salesDiagnostic").addEventListener("click",async()=>{
- const btn=$("salesDiagnostic"),out=$("salesDiagnosticResult");
- btn.disabled=true;out.hidden=false;out.textContent="Memeriksa akses transaksi...";
- try{
-  const auth=await sb.auth.getUser();
-  const authId=auth.data?.user?.id||null;
-  const today=jakartaDate(),tomorrow=new Date(today);tomorrow.setUTCDate(tomorrow.getUTCDate()+1);
-  const from=new Date(dateWIB(today)).toISOString(),to=new Date(dateWIB(tomorrow)).toISOString();
-  const base=()=>sb.from("sales").select("id,sold_at,total,cashier_id,branch_id");
-  const probes=[
-   ["Tanpa filter (RLS tetap berlaku)",base().order("sold_at",{ascending:false}).limit(5)],
-   ["Filter ID kasir saja",base().eq("cashier_id",user.id).order("sold_at",{ascending:false}).limit(5)],
-   ["Filter ID kasir + WIB",base().eq("cashier_id",user.id).gte("sold_at",from).lt("sold_at",to).order("sold_at",{ascending:false}).limit(5)]
-  ];
-  const results=[];
-  for(const [name,query] of probes){
-   const r=await query;
-   results.push({pemeriksaan:name,jumlah_dari_5_terbaru:r.data?.length??null,error:r.error?.message||null,transaksi:(r.data||[]).map(x=>({id:x.id,total:x.total,waktu:x.sold_at}))});
-  }
-  out.textContent=JSON.stringify({
-   nama_profil:profile?.display_name,role:profile?.role,
-   id_login:user?.id,id_auth_terverifikasi:authId,
-   auth_error:auth.error?.message||null,
-   id_cabang_profil:profile?.branch_id,
-   tanggal_wib:today.toISOString().slice(0,10),batas_mulai_utc:from,batas_akhir_utc:to,
-   pemeriksaan:results
-  },null,2);
- }catch(e){out.textContent="Diagnosa gagal: "+String(e?.message||e)}
- finally{btn.disabled=false}
-});
-
 
 $("sales").addEventListener("click",async e=>{
  const btn=e.target.closest("[data-sale-detail]");if(!btn)return;
