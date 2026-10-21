@@ -135,16 +135,26 @@ body:not(.logged-in) #login{width:min(100%,470px);margin:0 auto!important;flex-s
 #pinLoginBtn:active:not(:disabled){transform:scale(.99)}
 #pinLoginBtn .login-arrow{font-size:22px;line-height:1}
 
-/* V10 FIX: desktop header controls remain accessible after login.
-   Mobile keeps existing responsive header controls. */
+/* PATCH TATA LETAK TOMBOL — hanya CSS, tanpa mengubah login */
 @media (min-width:1051px){
-  #appHeader{justify-content:space-between;gap:8px}
-  #appHeader .brand{min-width:0;flex:1}
-  #appHeader .brand h1{font-size:15px}
-  #appHeader .header-actions{display:flex!important;align-items:center;gap:5px;margin-left:0;flex-shrink:0}
-  #appHeader .icon-action{display:grid;place-items:center;width:30px;height:34px;min-width:30px;font-size:20px;border-radius:8px;padding:0}
-  #appHeader #headerLogout{display:grid!important}
-  #appHeader #headerLogout svg{width:19px;height:19px}
+ #appHeader{height:145px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px}
+ #appHeader .header-actions{display:flex!important;justify-content:center;align-items:center;gap:10px;margin:0;width:100%}
+ #appHeader .header-actions .icon-action{width:38px;height:38px;min-width:38px;display:grid;place-items:center;border-radius:10px}
+ .top-nav{top:145px}
+}
+@media (max-width:1050px){
+ #appHeader{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+ #appHeader .brand{flex:1;min-width:0}
+ #appHeader .header-actions{display:flex!important;align-items:center;justify-content:flex-end;gap:7px;margin-left:auto;flex-shrink:0}
+ #appHeader .header-actions .icon-action{width:38px;height:38px;min-width:38px;display:grid;place-items:center;border-radius:10px;padding:0}
+}
+@media (max-width:420px){
+ #appHeader{padding:9px 10px;gap:5px}
+ #appHeader .brand{gap:5px}
+ #appHeader .brand img{width:35px;height:35px}
+ #appHeader .brand h1{font-size:13px}
+ #appHeader .header-actions{gap:4px}
+ #appHeader .header-actions .icon-action{width:33px;height:33px;min-width:33px;font-size:19px}
 }
 </style></head>
 <body><header id="appHeader"><div class="brand"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken"><div><h1>Inu Chicken POS</h1><span class="role-chip" id="roleTop">—</span></div></div><div class="header-actions"><span id="headerBranch" class="header-branch" hidden></span><button type="button" id="headerReload" class="icon-action" aria-label="Muat ulang" title="Muat ulang">↻</button><button type="button" id="themeToggle" class="icon-action" aria-label="Mode malam" title="Mode malam">☾</button><button type="button" id="headerLogout" class="icon-action exit" aria-label="Keluar" title="Keluar"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button></div><span id="identity" hidden></span></header>
@@ -481,15 +491,13 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)inuEnforce
 window.addEventListener("focus",()=>inuEnforceCashierDay().catch(console.warn));
 function showLogin(){if(offlineTimer){clearInterval(offlineTimer);offlineTimer=null}$("offlineStrip").hidden=true;$("cashierAttendanceStatus").hidden=true;document.body.classList.remove("logged-in");currentView=null;user=null;profile=null;$("attendancePanel").hidden=true;$("ownerPinPanel").hidden=true;$("login").style.display="block";$("app").style.display="none";$("identity").textContent=""}
 async function check(res){if(res.error)throw res.error;return res.data}
-async function start(freshLogin=false){
+async function start(){
  const {data:{session}}=await sb.auth.getSession();
  if(!session){showLogin();return}
  user=session.user;
  try{
   profile=await check(await sb.from("profiles").select("id,role,branch_id,display_name,active").eq("id",user.id).single());
   if(!profile.active||!["owner","kasir"].includes(profile.role))throw Error("Profil belum aktif atau peran tidak valid.");
-  // Login baru terverifikasi: catat hari WIB SEBELUM guard auto-logout / await berikutnya.
-  if(freshLogin&&profile.role==="kasir")localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());
   $("login").style.display="none";$("app").style.display="block";document.body.classList.add("logged-in");document.querySelectorAll("#topNav [data-owner-only]").forEach(b=>b.hidden=profile.role!=="owner");
   $("identity").textContent=profile.display_name||user.email;
   $("role").textContent=profile.role==="owner"?"Owner":"";$("roleTop").textContent=profile.role==="owner"?"OWNER":(profile.display_name||"KASIR");
@@ -580,8 +588,8 @@ $('saleAddItem').onclick=()=>{saleEditLine();saleEditRecalc()};$('saleEditCancel
 $('saleEditForm').addEventListener('submit',async e=>{e.preventDefault();if(profile?.role!=='owner'||!editingSaleId)return;const lines=[...document.querySelectorAll('#saleEditItems .sale-edit-line')];const items=lines.map(l=>({product_name:l.querySelector('.edit-name').value.trim(),qty:Number(l.querySelector('.edit-qty').value),unit_price:Number(l.querySelector('.edit-price').value)}));if(!items.length||items.some(x=>!x.product_name||!Number.isInteger(x.qty)||x.qty<1||x.qty>999||!Number.isInteger(x.unit_price)||x.unit_price<0)){alert('Periksa nama, jumlah, dan harga produk.');return}const btn=$('saleEditSave');btn.disabled=true;$('saleEditStatus').textContent='Menyimpan...';try{await check(await sb.rpc('owner_edit_sale',{p_sale_id:editingSaleId,p_items:items,p_payment_method:$('saleEditMethod').value,p_reason:$('saleEditReason').value.trim()}));$('saleEditor').hidden=true;editingSaleId=null;await loadSales();await loadReportPeriod();$('saleEditStatus').textContent='Berhasil disimpan.';message('Transaksi berhasil diedit.')}catch(err){$('saleEditStatus').textContent='Gagal: '+err.message;await logError(err,'edit-sale')}finally{btn.disabled=false}});
 async function voidSale(id){if(profile?.role!=='owner')return;const reason=prompt('Alasan pembatalan transaksi (wajib):');if(reason===null)return;if(!reason.trim()){alert('Alasan wajib diisi.');return}if(!confirm('Batalkan transaksi ini? Riwayat tetap disimpan dan laporan akan diperbarui.'))return;try{await check(await sb.rpc('owner_void_sale',{p_sale_id:id,p_reason:reason.trim()}));await loadSales();await loadReportPeriod();message('Transaksi dibatalkan.')}catch(err){alert('Gagal membatalkan: '+err.message);await logError(err,'void-sale')}}
 $("loginPin").addEventListener("input",()=>{$("loginPinError").hidden=true;$("loginPinError").textContent=""});
-$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;$("loginPinError").hidden=true;$("loginPinError").textContent="";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start(true);if(profile?.role==="kasir")await autoClockInAfterLogin()}catch(err){console.warn("Login PIN gagal",err);$("loginPinError").textContent="PIN salah atau login belum berhasil. Silakan coba lagi.";$("loginPinError").hidden=false;$("loginPin").focus()}finally{btn.disabled=false}});
-$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start(true);if(profile?.role==="kasir")await autoClockInAfterLogin()}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
+$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;$("loginPinError").hidden=true;$("loginPinError").textContent="";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start();if(profile?.role==="kasir"){localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await autoClockInAfterLogin()}}catch(err){console.warn("Login PIN gagal",err);$("loginPinError").textContent="PIN salah atau login belum berhasil. Silakan coba lagi.";$("loginPinError").hidden=false;$("loginPin").focus()}finally{btn.disabled=false}});
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start();if(profile?.role==="kasir"){localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await autoClockInAfterLogin()}}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
 $("ownerPinForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner"||!user)return;const a=$("ownerPin"),b=$("ownerPinConfirm"),btn=$("ownerPinSave"),status=$("ownerPinStatus");status.textContent="";if(!/^[0-9]{6}$/.test(a.value)){status.textContent="PIN harus tepat 6 digit.";return}if(a.value!==b.value){status.textContent="Konfirmasi PIN tidak sama.";return}btn.disabled=true;try{const {error}=await sb.rpc("set_my_pin",{p_pin:a.value});if(error)throw error;status.className="ok";status.textContent="PIN Owner berhasil diperbarui. Gunakan PIN baru pada login berikutnya."}catch(err){status.className="error";status.textContent="Gagal menyimpan PIN: "+String(err?.message||err)}finally{a.value="";b.value="";btn.disabled=false}});
 $("cashierPinUpdateForm").addEventListener("submit",async e=>{
  e.preventDefault();
