@@ -228,6 +228,15 @@ body.dark-mode #reportDetails>summary{background:#1f2937;color:#fda4af}
  #reportFilters{display:flex;flex-wrap:wrap}#reportFilters button{flex:1;white-space:nowrap}
  #reportDetails .stat-grid{grid-template-columns:1fr}
 }
+
+/* Foto menu: nama dan harga asli tetap ditampilkan */
+.product-media{position:relative;display:grid;place-items:center;width:100%;height:145px;overflow:hidden;border-radius:12px;background:#fff0f2;flex-shrink:0}
+.product-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.product{padding:12px;gap:12px;min-height:235px;justify-content:flex-start}
+.product-info{display:block;padding:0 3px 4px;min-width:0;width:100%}.product-info b{overflow-wrap:anywhere}
+.product .plus-icon{z-index:1;top:20px;right:20px;background:#e50928;color:white;box-shadow:0 2px 8px #0002}
+body.dark-mode .product-media{background:#334155}
+@media(max-width:580px){.product{padding:9px;gap:10px;min-height:195px}.product-media{height:115px}.product .plus-icon{top:16px;right:16px}.product-info b{font-size:14px}.product-info small{font-size:13px}}
 </style></head>
 <body>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -249,11 +258,11 @@ body.dark-mode #reportDetails>summary{background:#1f2937;color:#fda4af}
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
-<section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
-<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
+<section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><p class="muted small" id="autoRefreshInfo" role="status">Auto-refresh 30 detik saat aplikasi aktif.</p><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
+<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong><span class="small muted">Nasi + Ayam &amp; Ayam Only</span></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
 <div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
-<details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
+<details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong><div class="muted small">Transaksi selesai pada periode pilihan</div></div></div>
 <section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
 <div class="product-charts" aria-label="Grafik informasi penjualan produk">
 <section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section>
@@ -261,7 +270,7 @@ body.dark-mode #reportDetails>summary{background:#1f2937;color:#fda4af}
 </div></details>
 <p id="productChartStatus" class="muted small" role="status">Data kategori produk mengikuti periode laporan yang dipilih.</p>
 <p class="muted small">Laporan mengikuti periode pilihan (WIB) dan hanya menghitung transaksi completed. Bila data melebihi batas pengambilan, akan ada peringatan.</p></section>
-<div id="transactionArea"><div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
+<div id="transactionArea"><div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
@@ -470,7 +479,12 @@ function reportRange(){
  if(reportPeriod==="month")start.setUTCDate(1);
  return {from:new Date(dateWIB(start)).toISOString(),to:new Date(dateWIB(end)).toISOString()};
 }
+let reportLoadActive=0;
 async function loadReportPeriod(){
+ reportLoadActive++;
+ try{return await loadReportPeriodData()}finally{reportLoadActive--}
+}
+async function loadReportPeriodData(){
  if(profile?.role!=="owner")return;
  const seq=++reportFetchSeq;let range;
  try{range=reportRange();$("reportDateError").hidden=true;}catch(e){$("reportDateError").textContent=e.message;$("reportDateError").hidden=false;return;}
@@ -616,7 +630,29 @@ async function load(){
   renderProducts();renderCart();await loadSales();if(profile.role==="owner")await loadManagement();await loadAttendance();
  }catch(e){message(e.message,true);await logError(e,"load")}
 }
-function renderProducts(){const emoji=p=>/sambal|saus|sauce/i.test(p.name)?"🌶️":/nasi.*ayam/i.test(p.name)?"🍗 🍚":/ayam/i.test(p.name)?"🍗":/nasi/i.test(p.name)?"🍚":"🍽️";$("products").innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),"id")}).map(p=>`<button class="product" data-product="${escapeHTML(p.id)}"><span class="food-emoji">${emoji(p)}</span><span class="plus-icon">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`).join(""):"<p class='muted'>Belum ada produk aktif.</p>"}
+// Foto ilustrasi kategori; identitas, nama, harga, dan ID produk tetap dari database.
+const menuCategoryImages={
+ meal:'https://awsimages.detik.net.id/community/media/visual/2024/07/22/paket-nasi-ayam-hemat-minimarket-2.png?w=600',
+ chicken:'https://awsimages.detik.net.id/community/media/visual/2022/06/24/fried-chicken-murah-5.jpeg?w=600',
+ rice:'https://res.cloudinary.com/dk0z4ums3/image/upload/v1762501417/attached_image/puasa-mutih-ini-yang-perlu-diketahui-sebelum-mencobanya.jpg',
+ sambal:'https://fibercreme.com/wp-content/uploads/2025/06/delicious-meal-with-sambal-arrangement.webp'
+};
+function menuPhotoCategory(name){
+ const n=String(name||'');
+ if(/nasi/i.test(n)&&/ayam/i.test(n))return 'meal';
+ if(/sambal|saus|sauce/i.test(n)&&!/ayam/i.test(n))return 'sambal';
+ if(/ayam/i.test(n))return 'chicken';
+ if(/nasi/i.test(n))return 'rice';
+ return null;
+}
+function renderProducts(){
+ const emoji=p=>/sambal|saus|sauce/i.test(p.name)?'🌶️':/nasi/i.test(p.name)&&/ayam/i.test(p.name)?'🍗 🍚':/ayam/i.test(p.name)?'🍗':/nasi/i.test(p.name)?'🍚':'🍽️';
+ $('products').innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),'id')}).map(p=>{
+  const photo=menuCategoryImages[menuPhotoCategory(p.name)];
+  return `<button class="product" data-product="${escapeHTML(p.id)}"><span class="product-media" aria-hidden="true"><span class="food-emoji">${emoji(p)}</span>${photo?`<img class="product-photo" src="${escapeHTML(photo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}</span><span class="plus-icon" aria-hidden="true">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`;
+ }).join(''):"<p class='muted'>Belum ada produk aktif.</p>";
+}
+
 $('mobileCheckout').onclick=()=>{
  const checkout=$('cashierCheckout');checkout.focus({preventScroll:true});
  checkout.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
@@ -1089,4 +1125,36 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.warn('PWA service worker gagal:', err));
   });
 }
+
+// Refresh data tanpa reload halaman. Keranjang aktif tidak diganti harga/produknya.
+let dataAutoRefreshBusy=false,dataAutoRefreshLast=0;
+async function refreshActiveData(){
+ if(dataAutoRefreshBusy||!user||!profile||document.hidden||!navigator.onLine||busy||reportLoadActive||Date.now()-dataAutoRefreshLast<10000)return;
+ if(document.querySelector('dialog[open]')||document.activeElement?.matches('input,select,textarea'))return;
+ if(!['report','transaction','recent','products'].includes(currentView))return;
+ const sessionUser=user.id;
+ dataAutoRefreshBusy=true;dataAutoRefreshLast=Date.now();
+ try{
+  if(!cart.size){
+   const result=await sb.from('products').select('id,sku,name,price,active').eq('active',true).order('name');
+   if(result.error)throw result.error;
+   if(!user||user.id!==sessionUser||!profile)return;
+   if(!busy&&!cart.size){
+    const latest=result.data||[];
+    if(JSON.stringify(latest)!==JSON.stringify(products)){products=latest;renderProducts();renderCart()}
+   }
+  }
+  if(!user||user.id!==sessionUser||!profile||document.hidden)return;
+  if(currentView==='report'&&profile.role==='owner'&&!reportLoadActive)await loadReportPeriod();
+  else if(currentView==='recent')await loadSales();
+  if(user?.id===sessionUser){
+   $('autoRefreshInfo').textContent='Auto-refresh 30 detik · Terakhir diperbarui '+new Date().toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour12:false})+' WIB';
+  }
+ }catch(e){console.warn('Auto-refresh belum berhasil',e);if(user?.id===sessionUser)$('autoRefreshInfo').textContent='Auto-refresh akan mencoba lagi saat koneksi siap.'}
+ finally{dataAutoRefreshBusy=false}
+}
+setInterval(()=>{refreshActiveData().catch(console.warn)},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshActiveData().catch(console.warn)});
+window.addEventListener('focus',()=>refreshActiveData().catch(console.warn));
+window.addEventListener('online',()=>refreshActiveData().catch(console.warn));
 </script></body></html>
