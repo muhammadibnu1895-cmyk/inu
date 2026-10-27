@@ -203,6 +203,31 @@ body.dark-mode .daily-column:hover,body.dark-mode .branch-modern-row:hover{backg
  .product-chart-table-wrap{overflow:auto}.product-chart-table{min-width:420px}
  #reportPanel .branch-modern-row{font-size:12px;gap:8px}
 }
+
+/* Dashboard ringkas */
+#reportPanel>.report-grid-modern{grid-template-columns:minmax(0,1fr);margin:18px 0}
+#reportDetails{margin:18px 0;border-radius:14px}
+#reportDetails>summary{list-style:none;cursor:pointer;border:1px solid #e50928;border-radius:12px;color:#d20927;background:#fff;padding:16px;text-align:center;font-weight:750;min-height:50px}
+#reportDetails>summary::-webkit-details-marker{display:none}
+#reportDetails>summary span{display:inline-block;margin-left:10px}#reportDetails[open]>summary span{transform:rotate(180deg)}
+#reportDetails>p{text-align:center;margin:10px 0 18px}
+.report-details-content{display:grid;gap:16px;margin-top:16px}.report-details-content>.panel{margin:0}
+.report-details-content>.panel:has(#reportBranchBars){display:none}
+#reportPanel>.stat-grid:first-of-type{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#reportPanel>.stat-grid:first-of-type .stat-card{padding:20px 18px 20px 74px;min-height:110px}
+#reportPanel .view-title{margin-bottom:18px}
+#reportPanel .best-products{margin-bottom:0}
+#reportPanel #productChartStatus{font-size:12px;margin:14px 0;color:#64748b}
+body.dark-mode #reportDetails>summary{background:#1f2937;color:#fda4af}
+@media(max-width:700px){
+ #reportPanel>.stat-grid:first-of-type .stat-card{padding:16px 12px;min-height:96px}
+ #reportPanel>.stat-grid:first-of-type .stat-card strong{font-size:clamp(19px,5vw,25px)!important}
+ #reportPanel .daily-chart{height:235px}#reportPanel .daily-bar-space{height:165px}
+ #reportPanel .best-products h3{margin-top:0}
+ #reportPanel .view-title p{font-size:13px}
+ #reportFilters{display:flex;flex-wrap:wrap}#reportFilters button{flex:1;white-space:nowrap}
+ #reportDetails .stat-grid{grid-template-columns:1fr}
+}
 </style></head>
 <body>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -224,15 +249,16 @@ body.dark-mode .daily-column:hover,body.dark-mode .branch-modern-row:hover{backg
 </nav><div class="panel flex" id="branchToolbar"><label>Cabang <select id="branch"></select></label><span id="role" class="muted"></span></div>
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
-<section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard Penjualan</h2><p class="muted">Ringkasan penjualan sesuai periode pilihan</p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
+<section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
 <div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
-<div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
-<section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
-<div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3>📊 Penjualan Harian</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section></div>
+<div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
+<details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
+<section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
 <div class="product-charts" aria-label="Grafik informasi penjualan produk">
 <section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section>
 <section class="product-chart-card green"><h3>INFORMASI PENJUALAN TERLARIS</h3><div class="product-chart-plot" id="productQtyPlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productBestValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productBestQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section></div>
+</div></details>
 <p id="productChartStatus" class="muted small" role="status">Data kategori produk mengikuti periode laporan yang dipilih.</p>
 <p class="muted small">Laporan mengikuti periode pilihan (WIB) dan hanya menghitung transaksi completed. Bila data melebihi batas pengambilan, akan ada peringatan.</p></section>
 <div id="transactionArea"><div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
@@ -385,10 +411,14 @@ function showView(view){
 document.querySelectorAll("#topNav [data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
 function compactMoney(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',notation:'compact',maximumFractionDigits:2}).format(Number(n)||0)}
 function renderModernReport(rows,branchData){
+ const hourly=reportPeriod==='today';
  const dates=new Map();
- for(const sale of rows){const k=new Date(sale.sold_at).toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});const x=dates.get(k)||{cash:0,qris:0};x[sale.payment_method==='tunai'?'cash':'qris']+=Number(sale.total)||0;dates.set(k,x)}
+ if(hourly)for(let h=0;h<24;h+=4)dates.set(String(h).padStart(2,'0'),{cash:0,qris:0});
+ for(const sale of rows){const time=new Date(sale.sold_at);const k=hourly?String(Math.floor(Number(time.toLocaleTimeString('en-GB',{timeZone:'Asia/Jakarta',hour:'2-digit',hourCycle:'h23'}))/4)*4).padStart(2,'0'):time.toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'});const x=dates.get(k)||{cash:0,qris:0};x[sale.payment_method==='tunai'?'cash':'qris']+=Number(sale.total)||0;dates.set(k,x)}
  const keys=[...dates.keys()].sort().slice(-7),max=Math.max(1,...keys.map(k=>dates.get(k).cash+dates.get(k).qris));
- $('modernDailyChart').innerHTML=keys.length?keys.map(k=>{const x=dates.get(k),total=x.cash+x.qris;const detail=k+' · Tunai: '+rupiah(x.cash)+' · QRIS: '+rupiah(x.qris)+' · Total: '+rupiah(total);return `<button type="button" class="daily-column" data-chart-detail="${escapeHTML(detail)}" aria-label="${escapeHTML(detail)}"><span class="daily-value">${escapeHTML(compactMoney(total))}</span><span class="daily-bar-space"><span class="daily-stack" style="height:${total/max*100}%"><span class="daily-qris" style="height:${x.qris/(total||1)*100}%"></span><span class="daily-cash" style="height:${x.cash/(total||1)*100}%"></span></span></span><span class="daily-label">${escapeHTML(k.slice(8))}/${escapeHTML(k.slice(5,7))}</span></button>`}).join(''):'<p class="muted">Belum ada penjualan pada periode ini.</p>';
+ $('dailyChartTitle').textContent=hourly?'Penjualan Hari Ini':dates.size>7?'Penjualan Harian · 7 Hari Terakhir dalam Periode':'Penjualan Harian';
+ $('dashboardDate').textContent=new Date().toLocaleDateString('id-ID',{timeZone:'Asia/Jakarta',weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('modernDailyChart').innerHTML=rows.length?keys.map(k=>{const x=dates.get(k),total=x.cash+x.qris;const label=hourly?k+'.00–'+String(Number(k)+3).padStart(2,'0')+'.59 WIB':k;const detail=label+' · Tunai: '+rupiah(x.cash)+' · QRIS: '+rupiah(x.qris)+' · Total: '+rupiah(total);return `<button type="button" class="daily-column" data-chart-detail="${escapeHTML(detail)}" aria-label="${escapeHTML(detail)}"><span class="daily-value">${escapeHTML(compactMoney(total))}</span><span class="daily-bar-space"><span class="daily-stack" style="height:${total/max*100}%"><span class="daily-qris" style="height:${x.qris/(total||1)*100}%"></span><span class="daily-cash" style="height:${x.cash/(total||1)*100}%"></span></span></span><span class="daily-label">${hourly?k:escapeHTML(k.slice(8))+'/'+escapeHTML(k.slice(5,7))}</span></button>`}).join(''):'<p class="muted">Belum ada penjualan pada periode ini.</p>';
  const top=branchData.slice(0,8),highest=Math.max(1,...top.map(x=>x.value));
  $('modernBranchChart').innerHTML=top.length?top.map(x=>`<button type="button" class="branch-modern-row" data-chart-detail="${escapeHTML(x.name+': '+rupiah(x.value))}"><span>${escapeHTML(x.name)}</span><span class="branch-modern-track"><span class="branch-modern-fill" style="width:${x.value/highest*100}%"></span></span><span class="branch-modern-value">${escapeHTML(compactMoney(x.value))}</span></button>`).join(''):'<p class="muted">Belum ada penjualan pada periode ini.</p>';
 }
@@ -405,8 +435,8 @@ function renderReport(){
  const sum=items=>items.reduce((n,x)=>n+Number(x.total||0),0);
  const cash=rows.filter(x=>x.payment_method==="tunai");
  const noncash=rows.filter(x=>x.payment_method==="non_tunai");
- $("reportRevenue").textContent=rupiah(sum(rows));$("reportCount").textContent=String(rows.length);
- $("reportCash").textContent=rupiah(sum(cash));$("reportNoncash").textContent=rupiah(sum(noncash));
+ $("reportRevenue").textContent=compactMoney(sum(rows));$("reportRevenue").title=rupiah(sum(rows));$("reportCount").textContent=String(rows.length);
+ $("reportCash").textContent=compactMoney(sum(cash));$("reportCash").title=rupiah(sum(cash));$("reportNoncash").textContent=compactMoney(sum(noncash));$("reportNoncash").title=rupiah(sum(noncash));
  const bars=(el,items)=>{const max=Math.max(1,...items.map(x=>x.value));$(el).innerHTML=items.length?items.map(x=>`<div><div class="report-bar-label"><b>${escapeHTML(x.name)}</b><span>${rupiah(x.value)}</span></div><div class="report-track"><div class="report-fill" style="width:${Math.max(0,Math.min(100,x.value/max*100))}%"></div></div></div>`).join(""):"<p class='muted'>Belum ada transaksi.</p>"};
  const grouped=new Map();for(const x of rows){const name=branches.find(b=>b.id===x.branch_id)?.name||"Cabang tidak diketahui";grouped.set(name,(grouped.get(name)||0)+Number(x.total||0))}
  const branchData=[...grouped].map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value);
