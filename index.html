@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Inu Chicken POS </title><link rel="manifest" href="https://muhammadibnu1895-cmyk.github.io/inu/manifest.webmanifest"><meta name="theme-color" content="#f05a09"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="./icon-192.png">
+<title>Inu Chicken POS </title><link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#f05a09"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><link rel="apple-touch-icon" href="./icon-192.png">
 <style>
 :root{font-family:system-ui,Arial,sans-serif;color:#19202b;background:#f6f7fb}*{box-sizing:border-box}body{margin:0}header{background:#ae1622;color:white;padding:17px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px}h1{margin:0;font-size:21px}main{max-width:1200px;margin:25px auto;padding:0 16px}.panel{background:white;border:1px solid #e3e6eb;border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 3px 16px #1b23300a}input,select,button{font:inherit;padding:11px;border-radius:9px;border:1px solid #cbd2dd}button{background:#ae1622;color:white;border:0;cursor:pointer;font-weight:650}button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#eef0f4;color:#222}.grid{display:grid;grid-template-columns:1.3fr .85fr;gap:18px}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.product{border:1px solid #e3e6eb;background:#fff;color:#222;text-align:left;min-height:85px}.product b{display:block}.product small{display:block;color:#656c78;margin-top:7px}.flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.flex>*{min-width:0}.grow{flex:1}.muted{color:#6a7380}.error{color:#b91c1c}.ok{color:#137344}table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #e7e9ee;padding:10px 5px;text-align:left}td:last-child,th:last-child{text-align:right}.qty{width:68px}.total{font-size:25px;font-weight:800}#app{display:none}#login{max-width:440px;margin:55px auto}#login input{width:100%;margin:7px 0 14px}#login button{width:100%}#notice{margin:12px 0;min-height:24px}.small{font-size:12px}@media(max-width:780px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
 .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px}.admin-grid form{display:grid;gap:10px}.admin-grid input,.admin-grid select{width:100%}.admin-grid label{display:grid;gap:5px}.tag{background:#f4e7e8;border-radius:30px;padding:4px 9px;font-size:12px}.log-row{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.log-row code{font-size:12px}.mini{font-size:13px}.hint{background:#fff8e6;padding:12px;border-radius:9px;color:#78500a}#adminTabs button{background:#eee;color:#333}#adminTabs button.active{background:#ae1622;color:white}@media(max-width:780px){.admin-grid{grid-template-columns:1fr}}
@@ -28,14 +28,14 @@
 .product-chart-card{background:#fff;border:1px solid #dbe4ef;border-radius:24px;padding:28px 30px 30px;box-shadow:0 2px 4px #1e293b0b;min-width:0}
 .product-chart-card h3{text-align:center;color:#64748b;letter-spacing:.7px;font-size:17px;margin:2px 0 38px;font-weight:800}
 .product-chart-plot{height:340px;display:flex;align-items:flex-end;justify-content:space-around;gap:15px;border-bottom:2px solid #e5e7eb;padding:0 30px}
-.product-chart-column{height:100%;width:16%;display:flex;align-items:flex-end;justify-content:center}
+.product-chart-column{height:100%;width:15%;display:flex;align-items:flex-end;justify-content:center}
 .product-chart-bar{width:100%;max-width:70px;border-radius:9px 9px 0 0;min-height:0;transition:height .25s ease}
 .product-chart-card.orange .product-chart-bar{background:#f45108}.product-chart-card.green .product-chart-bar{background:#10b981}
 .product-chart-table-wrap{overflow-x:auto;margin-top:35px;border:1px solid #dbe4ef;border-radius:18px}
-.product-chart-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:14px;font-weight:750;text-align:center}
+.product-chart-table{width:100%;border-collapse:collapse;min-width:760px;table-layout:auto;font-size:12px;font-weight:750;text-align:center}
 .product-chart-table th,.product-chart-table td{padding:16px 9px;border-right:1px solid #dbe4ef;border-bottom:1px solid #dbe4ef;text-align:center;white-space:nowrap}
 .product-chart-table tr>*:last-child{border-right:0}.product-chart-table tr:last-child>*{border-bottom:0}
-.product-chart-table th:first-child,.product-chart-table td:first-child{text-align:left;width:25%;background:#f1f5f9}
+.product-chart-table th:first-child,.product-chart-table td:first-child{text-align:left;width:18%;background:#f1f5f9}
 .product-chart-table thead th{color:#334155;background:#f8fafc}
 .product-chart-card.orange .product-chart-table tbody tr:nth-child(2){background:#e8f1ff;color:#2659f5}
 .product-chart-card.orange .product-chart-table tbody tr:first-child{color:#f45108}
@@ -134,28 +134,6 @@ body:not(.logged-in) #login{width:min(100%,470px);margin:0 auto!important;flex-s
 #pinLoginBtn:hover:not(:disabled){background:#aa1020}
 #pinLoginBtn:active:not(:disabled){transform:scale(.99)}
 #pinLoginBtn .login-arrow{font-size:22px;line-height:1}
-
-/* PATCH TATA LETAK TOMBOL — hanya CSS, tanpa mengubah login */
-@media (min-width:1051px){
- #appHeader{height:145px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px}
- #appHeader .header-actions{display:flex!important;justify-content:center;align-items:center;gap:10px;margin:0;width:100%}
- #appHeader .header-actions .icon-action{width:38px;height:38px;min-width:38px;display:grid;place-items:center;border-radius:10px}
- .top-nav{top:145px}
-}
-@media (max-width:1050px){
- #appHeader{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
- #appHeader .brand{flex:1;min-width:0}
- #appHeader .header-actions{display:flex!important;align-items:center;justify-content:flex-end;gap:7px;margin-left:auto;flex-shrink:0}
- #appHeader .header-actions .icon-action{width:38px;height:38px;min-width:38px;display:grid;place-items:center;border-radius:10px;padding:0}
-}
-@media (max-width:420px){
- #appHeader{padding:9px 10px;gap:5px}
- #appHeader .brand{gap:5px}
- #appHeader .brand img{width:35px;height:35px}
- #appHeader .brand h1{font-size:13px}
- #appHeader .header-actions{gap:4px}
- #appHeader .header-actions .icon-action{width:33px;height:33px;min-width:33px;font-size:19px}
-}
 </style></head>
 <body><header id="appHeader"><div class="brand"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken"><div><h1>Inu Chicken POS</h1><span class="role-chip" id="roleTop">—</span></div></div><div class="header-actions"><span id="headerBranch" class="header-branch" hidden></span><button type="button" id="headerReload" class="icon-action" aria-label="Muat ulang" title="Muat ulang">↻</button><button type="button" id="themeToggle" class="icon-action" aria-label="Mode malam" title="Mode malam">☾</button><button type="button" id="headerLogout" class="icon-action exit" aria-label="Keluar" title="Keluar"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button></div><span id="identity" hidden></span></header>
 <main><section id="login" class="panel"><div class="login-mark"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken" onerror="this.style.display='none';this.parentNode.textContent='🍗'"></div><h2>Selamat Datang</h2><p class="login-subtitle">INU CHICKEN POS</p><form id="pinLoginForm"><label>PIN 6 digit<input id="loginPin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" required></label><p id="loginPinError" class="error mini" role="alert" aria-live="polite" hidden style="margin:0 0 12px;text-align:left"></p><button id="pinLoginBtn" type="submit">Masuk <span aria-hidden="true" class="login-arrow">→</span></button></form><details><summary>Login cadangan Owner (trial)</summary><form id="loginForm"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button id="loginBtn">Masuk</button></form><p class="muted small">Gunakan akun yang telah dibuat di Supabase Auth dan memiliki profil aktif.</p></details></section>
@@ -175,12 +153,12 @@ body:not(.logged-in) #login{width:min(100%,470px);margin:0 auto!important;flex-s
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>📊 Report & Analisa Penjualan</h2><p class="muted">Ringkasan transaksi yang dapat diakses Owner</p></div><span class="tag" id="reportScope">Hari ini</span></div><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
 <div class="stat-grid"><div class="stat-card orange"><small>Total Penjualan</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
-<div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Ayam Only)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi QTY kedua kategori, tidak termasuk nasi/saus terpisah</div></div></div>
+<div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>🍗🍚 Total QTY Produk Terjual (Nasi + Ayam &amp; Potongan Ayam)</small><strong id="reportCombinedQty">—</strong><div class="muted small">Akumulasi Nasi + Ayam dan seluruh potongan ayam (termasuk Ayam Only historis), tidak termasuk nasi/saus terpisah</div></div></div>
 <section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
 <div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3>📊 Penjualan Harian</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section></div>
 <div class="product-charts" aria-label="Grafik informasi penjualan produk">
-<section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section>
-<section class="product-chart-card green"><h3>INFORMASI PENJUALAN TERLARIS</h3><div class="product-chart-plot" id="productQtyPlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productBestValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productBestQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section></div>
+<section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>DADA / PAHA ATAS</th><th>SAYAP / PAHA BAWAH</th><th>AYAM ONLY (LAMA)</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="6">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="6">Memuat...</td></tr></tbody></table></div></section>
+<section class="product-chart-card green"><h3>INFORMASI PENJUALAN TERLARIS</h3><div class="product-chart-plot" id="productQtyPlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>DADA / PAHA ATAS</th><th>SAYAP / PAHA BAWAH</th><th>AYAM ONLY (LAMA)</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productBestValueRow"><td>NILAI</td><td colspan="6">Memuat...</td></tr><tr id="productBestQtyRow"><td>QTY</td><td colspan="6">Memuat...</td></tr></tbody></table></div></section></div>
 <p id="productChartStatus" class="muted small" role="status">Data kategori produk mengikuti periode laporan yang dipilih.</p>
 <p class="muted small">Laporan mengikuti periode pilihan (WIB) dan hanya menghitung transaksi completed. Bila data melebihi batas pengambilan, akan ada peringatan.</p></section>
 <div id="transactionArea"><div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div></section><section class="panel"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
@@ -415,18 +393,20 @@ $("reportCustomDates").addEventListener("submit",e=>{e.preventDefault();loadRepo
 let analyticsRequest=0;
 function classifyProduct(name){
  const n=String(name||"").toLowerCase();
- if(/saus|sambal|sauce/.test(n))return 3;
+ if(/saus|sambal|sauce/.test(n))return 5;
  if(/ayam/.test(n)&&/nasi/.test(n))return 0;
- if(/ayam/.test(n))return 1;
- if(/nasi/.test(n))return 2;
+ if(/dada|paha atas/.test(n))return 1;
+ if(/sayap|paha bawah/.test(n))return 2;
+ if(/ayam/.test(n))return 3; // Ayam Only historis
+ if(/nasi/.test(n))return 4;
  return -1;
 }
 function renderProductCharts(values,quantities){
  const chart=(id,data)=>{
-  const max=Math.max(1,...data),labels=["NASI + AYAM","AYAM ONLY","NASI","SAUS / SAMBAL"];
+  const max=Math.max(1,...data),labels=["NASI + AYAM","DADA / PAHA ATAS","SAYAP / PAHA BAWAH","AYAM ONLY (LAMA)","NASI","SAUS / SAMBAL"];
   $(id).innerHTML=data.map((v,i)=>`<div class="product-chart-column"><div class="product-chart-bar" tabindex="0" role="img" aria-label="${labels[i]}: QTY ${quantities[i]}, nilai ${rupiah(values[i])}" style="height:${v>0?Math.max(1.1,v/max*100):0}%"><span class="product-chart-tooltip"><b>${labels[i]}</b><br>QTY: ${new Intl.NumberFormat("id-ID").format(quantities[i])}<br>Total: ${rupiah(values[i])}</span></div></div>`).join("");
  };
- $("reportCombinedQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[0]+quantities[1]);
+ $("reportCombinedQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[0]+quantities[1]+quantities[2]+quantities[3]);
  chart("productValuePlot",values);chart("productQtyPlot",quantities);
  const money=values.map(v=>`<td>${rupiah(v)}</td>`).join("");
  const qty=quantities.map(v=>`<td>${new Intl.NumberFormat("id-ID").format(v)}</td>`).join("");
@@ -440,7 +420,7 @@ async function loadProductAnalytics(){
  const seq=++analyticsRequest;
  $("reportCombinedQty").textContent="Memuat...";
  const rows=(window.reportSalesRows||[]).filter(s=>s.status==="completed");
- const values=[0,0,0,0],qtys=[0,0,0,0];
+ const values=[0,0,0,0,0,0],qtys=[0,0,0,0,0,0];
  if(!rows.length){renderProductCharts(values,qtys);$("productChartStatus").textContent="Belum ada transaksi selesai dalam periode ini.";return;}
  const saleIds=rows.map(s=>s.id);
  // Query per batch untuk menghindari URL IN terlalu panjang.
@@ -458,7 +438,7 @@ async function loadProductAnalytics(){
  }
  if(seq!==analyticsRequest)return;
  renderProductCharts(values,qtys);
- $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Produk di luar empat kategori tidak ditampilkan.";
+ $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Produk di luar enam kategori tidak ditampilkan.";
 }
 
 // Batas sesi kasir mengikuti tanggal Asia/Jakarta, bukan zona waktu perangkat.
@@ -522,7 +502,7 @@ async function load(){
   renderProducts();renderCart();await loadSales();if(profile.role==="owner")await loadManagement();await loadAttendance();
  }catch(e){message(e.message,true);await logError(e,"load")}
 }
-function renderProducts(){const emoji=p=>/sambal|saus|sauce/i.test(p.name)?"🌶️":/nasi.*ayam/i.test(p.name)?"🍗 🍚":/ayam/i.test(p.name)?"🍗":/nasi/i.test(p.name)?"🍚":"🍽️";$("products").innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),"id")}).map(p=>`<button class="product" data-product="${escapeHTML(p.id)}"><span class="food-emoji">${emoji(p)}</span><span class="plus-icon">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`).join(""):"<p class='muted'>Belum ada produk aktif.</p>"}
+function renderProducts(){const emoji=p=>/sambal|saus|sauce/i.test(p.name)?"🌶️":/nasi.*ayam/i.test(p.name)?"🍗 🍚":/dada|paha|sayap|ayam/i.test(p.name)?"🍗":/nasi/i.test(p.name)?"🍚":"🍽️";$("products").innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),"id")}).map(p=>`<button class="product" data-product="${escapeHTML(p.id)}"><span class="food-emoji">${emoji(p)}</span><span class="plus-icon">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`).join(""):"<p class='muted'>Belum ada produk aktif.</p>"}
 function renderCart(){
  let sum=0;let rows="";
  for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><input class="qty" data-qty="${escapeHTML(id)}" type="number" min="0" max="999" value="${qty}"></td><td>${rupiah(Number(p.price)*qty)}</td></tr>`}
@@ -588,8 +568,8 @@ $('saleAddItem').onclick=()=>{saleEditLine();saleEditRecalc()};$('saleEditCancel
 $('saleEditForm').addEventListener('submit',async e=>{e.preventDefault();if(profile?.role!=='owner'||!editingSaleId)return;const lines=[...document.querySelectorAll('#saleEditItems .sale-edit-line')];const items=lines.map(l=>({product_name:l.querySelector('.edit-name').value.trim(),qty:Number(l.querySelector('.edit-qty').value),unit_price:Number(l.querySelector('.edit-price').value)}));if(!items.length||items.some(x=>!x.product_name||!Number.isInteger(x.qty)||x.qty<1||x.qty>999||!Number.isInteger(x.unit_price)||x.unit_price<0)){alert('Periksa nama, jumlah, dan harga produk.');return}const btn=$('saleEditSave');btn.disabled=true;$('saleEditStatus').textContent='Menyimpan...';try{await check(await sb.rpc('owner_edit_sale',{p_sale_id:editingSaleId,p_items:items,p_payment_method:$('saleEditMethod').value,p_reason:$('saleEditReason').value.trim()}));$('saleEditor').hidden=true;editingSaleId=null;await loadSales();await loadReportPeriod();$('saleEditStatus').textContent='Berhasil disimpan.';message('Transaksi berhasil diedit.')}catch(err){$('saleEditStatus').textContent='Gagal: '+err.message;await logError(err,'edit-sale')}finally{btn.disabled=false}});
 async function voidSale(id){if(profile?.role!=='owner')return;const reason=prompt('Alasan pembatalan transaksi (wajib):');if(reason===null)return;if(!reason.trim()){alert('Alasan wajib diisi.');return}if(!confirm('Batalkan transaksi ini? Riwayat tetap disimpan dan laporan akan diperbarui.'))return;try{await check(await sb.rpc('owner_void_sale',{p_sale_id:id,p_reason:reason.trim()}));await loadSales();await loadReportPeriod();message('Transaksi dibatalkan.')}catch(err){alert('Gagal membatalkan: '+err.message);await logError(err,'void-sale')}}
 $("loginPin").addEventListener("input",()=>{$("loginPinError").hidden=true;$("loginPinError").textContent=""});
-$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;$("loginPinError").hidden=true;$("loginPinError").textContent="";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await start();if(profile?.role==="kasir"){await autoClockInAfterLogin()}}catch(err){console.warn("Login PIN gagal",err);$("loginPinError").textContent="PIN salah atau login belum berhasil. Silakan coba lagi.";$("loginPinError").hidden=false;$("loginPin").focus()}finally{btn.disabled=false}});
-$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await start();if(profile?.role==="kasir"){await autoClockInAfterLogin()}}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
+$("pinLoginForm").addEventListener("submit",async e=>{e.preventDefault();const btn=$("pinLoginBtn"),pin=$("loginPin").value;$("loginPinError").hidden=true;$("loginPinError").textContent="";btn.disabled=true;try{const {data,error}=await sb.functions.invoke("pin-login",{body:{pin}});if(error||data?.error)throw Error(data?.error||error.message);const verified=await sb.auth.verifyOtp({token_hash:data.token_hash,type:"magiclink"});if(verified.error)throw verified.error;$("loginPin").value="";await start();if(profile?.role==="kasir"){localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await autoClockInAfterLogin()}}catch(err){console.warn("Login PIN gagal",err);$("loginPinError").textContent="PIN salah atau login belum berhasil. Silakan coba lagi.";$("loginPinError").hidden=false;$("loginPin").focus()}finally{btn.disabled=false}});
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();$("loginBtn").disabled=true;try{await check(await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value}));await start();if(profile?.role==="kasir"){localStorage.setItem(INU_CASHIER_DAY_KEY,inuWibDay());await autoClockInAfterLogin()}}catch(err){alert("Gagal login: "+err.message)}finally{$("loginBtn").disabled=false}});
 $("ownerPinForm").addEventListener("submit",async e=>{e.preventDefault();if(profile?.role!=="owner"||!user)return;const a=$("ownerPin"),b=$("ownerPinConfirm"),btn=$("ownerPinSave"),status=$("ownerPinStatus");status.textContent="";if(!/^[0-9]{6}$/.test(a.value)){status.textContent="PIN harus tepat 6 digit.";return}if(a.value!==b.value){status.textContent="Konfirmasi PIN tidak sama.";return}btn.disabled=true;try{const {error}=await sb.rpc("set_my_pin",{p_pin:a.value});if(error)throw error;status.className="ok";status.textContent="PIN Owner berhasil diperbarui. Gunakan PIN baru pada login berikutnya."}catch(err){status.className="error";status.textContent="Gagal menyimpan PIN: "+String(err?.message||err)}finally{a.value="";b.value="";btn.disabled=false}});
 $("cashierPinUpdateForm").addEventListener("submit",async e=>{
  e.preventDefault();
@@ -975,7 +955,7 @@ $('importConfirm').addEventListener('click',async()=>{
 </script><script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/inu/service-worker.js', {scope:'/inu/'})
+    navigator.serviceWorker.register('./service-worker.js', {scope:'./'})
       .catch(err => console.warn('PWA service worker gagal:', err));
   });
 }
