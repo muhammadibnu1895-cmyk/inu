@@ -134,8 +134,12 @@ body:not(.logged-in) #login{width:min(100%,470px);margin:0 auto!important;flex-s
 #pinLoginBtn:hover:not(:disabled){background:#aa1020}
 #pinLoginBtn:active:not(:disabled){transform:scale(.99)}
 #pinLoginBtn .login-arrow{font-size:22px;line-height:1}
+/* V10: toast status transaksi */
+#inuToast{position:fixed;right:20px;bottom:22px;z-index:1000;max-width:min(410px,calc(100vw - 30px));background:#172033;color:white;padding:15px 42px 15px 16px;border-radius:14px;box-shadow:0 12px 32px #0004;font-size:14px;line-height:1.5;display:none;border-left:5px solid #f59e0b}
+#inuToast.show{display:block}#inuToast.success{border-left-color:#22c55e}#inuToast.error{border-left-color:#ef4444}#inuToast button{position:absolute;right:7px;top:5px;background:transparent;color:white;padding:5px 10px;font-size:20px}
+@media(max-width:700px){#inuToast{bottom:78px;left:12px;right:12px;max-width:none}}
 </style></head>
-<body><header id="appHeader"><div class="brand"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken"><div><h1>Inu Chicken POS</h1><span class="role-chip" id="roleTop">—</span></div></div><div class="header-actions"><span id="headerBranch" class="header-branch" hidden></span><button type="button" id="headerReload" class="icon-action" aria-label="Muat ulang" title="Muat ulang">↻</button><button type="button" id="themeToggle" class="icon-action" aria-label="Mode malam" title="Mode malam">☾</button><button type="button" id="headerLogout" class="icon-action exit" aria-label="Keluar" title="Keluar"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button></div><span id="identity" hidden></span></header>
+<body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div><header id="appHeader"><div class="brand"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken"><div><h1>Inu Chicken POS</h1><span class="role-chip" id="roleTop">—</span></div></div><div class="header-actions"><span id="headerBranch" class="header-branch" hidden></span><button type="button" id="headerReload" class="icon-action" aria-label="Muat ulang" title="Muat ulang">↻</button><button type="button" id="themeToggle" class="icon-action" aria-label="Mode malam" title="Mode malam">☾</button><button type="button" id="headerLogout" class="icon-action exit" aria-label="Keluar" title="Keluar"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button></div><span id="identity" hidden></span></header>
 <main><section id="login" class="panel"><div class="login-mark"><img src="https://drive.google.com/thumbnail?id=1dVBSCD8Vx692icERGy2i7j_LxCcgjdNN&amp;sz=w400" alt="Logo Inu Chicken" onerror="this.style.display='none';this.parentNode.textContent='🍗'"></div><h2>Selamat Datang</h2><p class="login-subtitle">INU CHICKEN POS</p><form id="pinLoginForm"><label>PIN 6 digit<input id="loginPin" type="password" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="off" required></label><p id="loginPinError" class="error mini" role="alert" aria-live="polite" hidden style="margin:0 0 12px;text-align:left"></p><button id="pinLoginBtn" type="submit">Masuk <span aria-hidden="true" class="login-arrow">→</span></button></form><details><summary>Login cadangan Owner (trial)</summary><form id="loginForm"><label>Email<input id="email" type="email" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button id="loginBtn">Masuk</button></form><p class="muted small">Gunakan akun yang telah dibuat di Supabase Auth dan memiliki profil aktif.</p></details></section>
 <section id="app"><nav class="top-nav" id="topNav" aria-label="Navigasi aplikasi">
 <button type="button" data-view="report" data-owner-only>📊 Report & Analisa</button>
@@ -196,6 +200,13 @@ const $=id=>document.getElementById(id), rupiah=n=>new Intl.NumberFormat("id-ID"
 const sb=window.supabase.createClient(URL_SUPABASE,KEY_SUPABASE);
 let user=null,profile=null,branches=[],products=[],cart=new Map(),pendingId=null,busy=false;
 function message(s,bad=false){$("notice").textContent=s;$("notice").className=bad?"error":"ok"}
+let inuToastTimer=null;
+function inuToast(text,kind="info"){
+ const el=$("inuToast");$("inuToastText").textContent=text;
+ el.className="show "+kind;
+ clearTimeout(inuToastTimer);inuToastTimer=setTimeout(()=>el.classList.remove("show"),5500);
+}
+
 async function logError(e,modul="app",level="error"){
   console.error(modul,e);
   if(!user)return;
@@ -264,7 +275,7 @@ async function offlineSync(){
     if(network)break;
    }
   }
-  if(changed){message('Transaksi offline berhasil disinkronkan.');loadSales().catch(()=>{});if(profile?.role==='owner')loadReportPeriod().catch(()=>{})}
+  if(changed){message('Transaksi berhasil tersinkron ke server.');inuToast('✓ Transaksi berhasil tersimpan di server.','success');loadSales().catch(()=>{});if(profile?.role==='owner')loadReportPeriod().catch(()=>{})}
  }finally{offlineSyncBusy=false;await offlineRefresh()}
 }
 function offlineAutoStart(){
@@ -502,6 +513,26 @@ async function load(){
   renderProducts();renderCart();await loadSales();if(profile.role==="owner")await loadManagement();await loadAttendance();
  }catch(e){message(e.message,true);await logError(e,"load")}
 }
+/* Auto refresh data tanpa reload halaman / tanpa mengubah keranjang. */
+let inuRefreshBusy=false;
+async function inuRefreshView(){
+ if(inuRefreshBusy||!user||!profile||document.hidden||!navigator.onLine||busy)return;
+ inuRefreshBusy=true;
+ try{
+  if(currentView==="report"&&profile.role==="owner")await loadReportPeriod();
+  else if(currentView==="recent"&&$("saleEditor").hidden)await loadSales();
+ }catch(e){console.warn("Auto-refresh laporan:",e)}
+ finally{inuRefreshBusy=false}
+}
+setInterval(()=>{inuRefreshView().catch(console.warn)},30000);
+setInterval(async()=>{
+ if(!user||!profile||document.hidden||!navigator.onLine||busy||cart.size||currentView!=="transaction")return;
+ try{
+  const fresh=await check(await sb.from("products").select("id,sku,name,price,active").eq("active",true).order("name"));
+  if(cart.size||busy)return;
+  products=fresh;renderProducts();renderCart();
+ }catch(e){console.warn("Auto-refresh produk:",e)}
+},60000);
 function renderProducts(){const emoji=p=>/sambal|saus|sauce/i.test(p.name)?"🌶️":/nasi.*ayam/i.test(p.name)?"🍗 🍚":/dada|paha|sayap|ayam/i.test(p.name)?"🍗":/nasi/i.test(p.name)?"🍚":"🍽️";$("products").innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),"id")}).map(p=>`<button class="product" data-product="${escapeHTML(p.id)}"><span class="food-emoji">${emoji(p)}</span><span class="plus-icon">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`).join(""):"<p class='muted'>Belum ada produk aktif.</p>"}
 function renderCart(){
  let sum=0;let rows="";
@@ -635,10 +666,10 @@ $("pay").onclick=async()=>{
   if(existing&&JSON.stringify(existing.items)!==JSON.stringify(record.items))throw Error('ID transaksi sudah digunakan; muat ulang aplikasi sebelum mencoba lagi.');
   if(!existing)await offlinePut(record);
   cart.clear();resetRequest();$('cashReceived').value='';
-  message('Transaksi aman di perangkat. '+(navigator.onLine?'Mengirim ke server...':'Menunggu internet untuk sinkronisasi.'));
+  message('Transaksi aman di perangkat. '+(navigator.onLine?'Mengirim ke server...':'Menunggu internet untuk sinkronisasi.'));inuToast('Transaksi tersimpan di perangkat. '+(navigator.onLine?'Sedang sinkronisasi...':'Menunggu koneksi internet.'),'info');
   await offlineRefresh();
   if(navigator.onLine)await offlineSync();
- }catch(e){message('Gagal menyimpan transaksi di perangkat: '+e.message+'. Keranjang tidak dihapus bila penyimpanan gagal.',true)}
+ }catch(e){message('Gagal menyimpan transaksi di perangkat: '+e.message+'. Keranjang tidak dihapus bila penyimpanan gagal.',true);inuToast('Gagal menyimpan transaksi: '+e.message,'error')}
  finally{busy=false;renderCart()}
 };
 $("productForm").onsubmit=async e=>{e.preventDefault();if(profile?.role!=="owner")return;try{await check(await sb.from("products").insert({sku:"INU-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),name:$("productName").value.trim(),price:Number($("price").value)}));$("productForm").reset();message("Produk ditambahkan");await load()}catch(err){message(err.message,true)}};
