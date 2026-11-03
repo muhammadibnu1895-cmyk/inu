@@ -249,13 +249,15 @@ body.dark-mode .product-media{background:#334155}
 .cashier-awareness-item{background:#fff5f6;border:1px solid #ffdbe1;border-radius:12px;padding:12px;min-width:0}
 .cashier-awareness-item small{display:block;font-size:12px;color:#8a3041;margin-bottom:6px}
 .cashier-awareness-item strong{display:block;font-size:clamp(16px,2vw,23px);overflow-wrap:anywhere;color:#b60927}
-.chicken-cuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 15px}
-.chicken-cut{background:#fff;border:1px solid #f0d7da;border-radius:13px;overflow:hidden;text-align:center}
-.chicken-cut img{display:block;width:100%;height:90px;object-fit:cover}
-.chicken-cut b{display:block;font-size:12px;padding:9px 4px;color:#8e1a2b}
-body.dark-mode .cashier-awareness,body.dark-mode .chicken-cut{background:#1f2937;border-color:#475569}
+/* Ilustrasi potongan ayam ditempatkan di dalam kartu produk, bukan baris terpisah. */
+.product-media.chicken-gallery{height:145px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#fff0f2;padding:4px}
+.chicken-gallery .cut-photo{min-width:0;height:100%;position:relative;overflow:hidden;border-radius:8px;background:#f5dfe3}
+.chicken-gallery .cut-photo img{display:block;width:100%;height:100%;object-fit:cover}
+.chicken-gallery .cut-photo span{position:absolute;bottom:0;left:0;right:0;background:#101827bb;color:#fff;text-align:center;font-size:9px;font-weight:700;padding:5px 2px;line-height:1.2}
+@media(max-width:580px){.product-media.chicken-gallery{height:115px;gap:3px;padding:3px}.chicken-gallery .cut-photo span{font-size:8px;padding:4px 1px}}
+body.dark-mode .cashier-awareness{background:#1f2937;border-color:#475569}
 body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
-@media(max-width:520px){.cashier-awareness-grid{gap:6px}.cashier-awareness-item{padding:9px 7px}.cashier-awareness-item small{font-size:10px}.cashier-awareness-item strong{font-size:15px}.chicken-cut img{height:68px}.chicken-cut b{font-size:10px}}
+@media(max-width:520px){.cashier-awareness-grid{gap:6px}.cashier-awareness-item{padding:9px 7px}.cashier-awareness-item small{font-size:10px}.cashier-awareness-item strong{font-size:15px}}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -293,11 +295,7 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 <section class="cashier-awareness" id="cashierAwareness" aria-label="Ringkasan transaksi kasir hari ini">
 <h3>📊 Ringkasan Kasir Hari Ini</h3><p id="cashierAwarenessScope">Transaksi selesai hari ini (WIB), hanya penjualan akun Kasir ini. Transaksi offline tertunda belum dihitung.</p>
 <div class="cashier-awareness-grid"><div class="cashier-awareness-item"><small>Total QTY Ayam</small><strong id="cashierTodayQty">—</strong></div><div class="cashier-awareness-item"><small>Total Tunai</small><strong id="cashierTodayCash">—</strong></div><div class="cashier-awareness-item"><small>Total QRIS</small><strong id="cashierTodayQris">—</strong></div></div></section>
-<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div class="chicken-cuts" aria-label="Ilustrasi pilihan potongan ayam, bukan pilihan produk terpisah">
-<div class="chicken-cut"><img src="https://awsimages.detik.net.id/community/media/visual/2022/06/24/fried-chicken-murah-5.jpeg?w=600" alt="Ilustrasi ayam goreng dada atau paha atas" loading="lazy"><b>Dada / Paha Atas</b></div>
-<div class="chicken-cut"><img src="https://awsimages.detik.net.id/community/media/visual/2022/06/24/fried-chicken-murah-5.jpeg?w=600" alt="Ilustrasi ayam goreng sayap" loading="lazy" style="object-position:40% 50%"><b>Sayap</b></div>
-<div class="chicken-cut"><img src="https://awsimages.detik.net.id/community/media/visual/2022/06/24/fried-chicken-murah-5.jpeg?w=600" alt="Ilustrasi ayam goreng paha bawah" loading="lazy" style="object-position:70% 50%"><b>Paha Bawah</b></div>
-</div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
+<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
@@ -684,7 +682,11 @@ function renderProducts(){
  const emoji=p=>/sambal|saus|sauce/i.test(p.name)?'🌶️':/nasi/i.test(p.name)&&/ayam/i.test(p.name)?'🍗 🍚':/ayam/i.test(p.name)?'🍗':/nasi/i.test(p.name)?'🍚':'🍽️';
  $('products').innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),'id')}).map(p=>{
   const photo=menuCategoryImages[menuPhotoCategory(p.name)];
-  return `<button class="product" data-product="${escapeHTML(p.id)}"><span class="product-media" aria-hidden="true"><span class="food-emoji">${emoji(p)}</span>${photo?`<img class="product-photo" src="${escapeHTML(photo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}</span><span class="plus-icon" aria-hidden="true">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`;
+  const isChicken=/ayam/i.test(p.name);
+  const cuts=['Dada / Paha Atas','Sayap','Paha Bawah'];
+  const positions=['15% 50%','50% 50%','85% 50%'];
+  const cutGallery=isChicken?`<span class="product-media chicken-gallery" aria-hidden="true">${cuts.map((cut,i)=>`<span class="cut-photo"><img src="${escapeHTML(menuCategoryImages.chicken)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="object-position:${positions[i]}" onerror="this.style.display='none'"><span>${cut}</span></span>`).join('')}</span>`:'';
+  return `<button class="product" data-product="${escapeHTML(p.id)}">${cutGallery||`<span class="product-media" aria-hidden="true"><span class="food-emoji">${emoji(p)}</span>${photo?`<img class="product-photo" src="${escapeHTML(photo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}</span>`}<span class="plus-icon" aria-hidden="true">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`;
  }).join(''):"<p class='muted'>Belum ada produk aktif.</p>";
 }
 
