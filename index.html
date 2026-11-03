@@ -276,14 +276,14 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><p class="muted small" id="autoRefreshInfo" role="status">Auto-refresh 30 detik saat aplikasi aktif.</p><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
-<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong><span class="small muted">Nasi + Ayam &amp; Ayam Only</span></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
+<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong><span class="small muted">Nasi + Ayam, Dada/Paha Atas, Sayap &amp; Paha Bawah (tanpa Ayam Only)</span></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
 <div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
 <details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong><div class="muted small">Transaksi selesai pada periode pilihan</div></div></div>
 <section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
 <div class="product-charts" aria-label="Grafik informasi penjualan produk">
-<section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section>
-<section class="product-chart-card green"><h3>INFORMASI PENJUALAN TERLARIS</h3><div class="product-chart-plot" id="productQtyPlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>AYAM</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productBestValueRow"><td>NILAI</td><td colspan="4">Memuat...</td></tr><tr id="productBestQtyRow"><td>QTY</td><td colspan="4">Memuat...</td></tr></tbody></table></div></section></div>
+<section class="product-chart-card orange"><h3>INFORMASI PENJUALAN INU CHICKEN</h3><div class="product-chart-plot" id="productValuePlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>DADA / PAHA ATAS</th><th>SAYAP</th><th>PAHA BAWAH</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productValueRow"><td>NILAI</td><td colspan="6">Memuat...</td></tr><tr id="productValueQtyRow"><td>QTY</td><td colspan="6">Memuat...</td></tr></tbody></table></div></section>
+<section class="product-chart-card green"><h3>INFORMASI PENJUALAN TERLARIS</h3><div class="product-chart-plot" id="productQtyPlot"></div><div class="product-chart-table-wrap"><table class="product-chart-table"><thead><tr><th>NAMA BARANG</th><th>NASI + AYAM</th><th>DADA / PAHA ATAS</th><th>SAYAP</th><th>PAHA BAWAH</th><th>NASI</th><th>SAUS / SAMBAL</th></tr></thead><tbody><tr id="productBestValueRow"><td>NILAI</td><td colspan="6">Memuat...</td></tr><tr id="productBestQtyRow"><td>QTY</td><td colspan="6">Memuat...</td></tr></tbody></table></div></section></div>
 </div></details>
 <p id="productChartStatus" class="muted small" role="status">Data kategori produk mengikuti periode laporan yang dipilih.</p>
 <p class="muted small">Laporan mengikuti periode pilihan (WIB) dan hanya menghitung transaksi completed. Bila data melebihi batas pengambilan, akan ada peringatan.</p></section>
@@ -549,19 +549,23 @@ $("reportCustomDates").addEventListener("submit",e=>{e.preventDefault();loadRepo
 // Analisa item produk: gunakan hanya sale_items dari transaksi selesai yang termuat.
 let analyticsRequest=0;
 function classifyProduct(name){
- const n=String(name||"").toLowerCase();
- if(/saus|sambal|sauce/.test(n))return 3;
- if(/ayam/.test(n)&&/nasi/.test(n))return 0;
- if(/ayam/.test(n))return 1;
- if(/nasi/.test(n))return 2;
+ const n=String(name||"").toLowerCase().replace(/\s+/g," ").trim();
+ if(/saus|sambal|sauce/.test(n))return 5;
+ // Ayam Only tidak lagi masuk grafik maupun Total QTY Ayam.
+ if(/ayam\s*only|only\s*ayam/.test(n))return -1;
+ if(/nasi/.test(n)&&/ayam|dada|paha|sayap/.test(n))return 0;
+ if(/dada|paha\s*atas/.test(n))return 1;
+ if(/sayap/.test(n))return 2;
+ if(/paha\s*bawah/.test(n))return 3;
+ if(/nasi/.test(n))return 4;
  return -1;
 }
 function renderProductCharts(values,quantities){
  const chart=(id,data)=>{
-  const max=Math.max(1,...data),labels=["NASI + AYAM","AYAM ONLY","NASI","SAUS / SAMBAL"];
+  const max=Math.max(1,...data),labels=["NASI + AYAM","DADA / PAHA ATAS","SAYAP","PAHA BAWAH","NASI","SAUS / SAMBAL"];
   $(id).innerHTML=data.map((v,i)=>`<div class="product-chart-column"><div class="product-chart-bar" tabindex="0" role="img" aria-label="${labels[i]}: QTY ${quantities[i]}, nilai ${rupiah(values[i])}" style="height:${v>0?Math.max(1.1,v/max*100):0}%"><span class="product-chart-tooltip"><b>${labels[i]}</b><br>QTY: ${new Intl.NumberFormat("id-ID").format(quantities[i])}<br>Total: ${rupiah(values[i])}</span></div></div>`).join("");
  };
- $("reportCombinedQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[0]+quantities[1]);
+ $("reportCombinedQty").textContent=new Intl.NumberFormat("id-ID").format(quantities[0]+quantities[1]+quantities[2]+quantities[3]);
  chart("productValuePlot",values);chart("productQtyPlot",quantities);
  const money=values.map(v=>`<td>${rupiah(v)}</td>`).join("");
  const qty=quantities.map(v=>`<td>${new Intl.NumberFormat("id-ID").format(v)}</td>`).join("");
@@ -576,7 +580,7 @@ async function loadProductAnalytics(){
  $("reportCombinedQty").textContent="Memuat...";
  $("bestProducts").textContent="Memuat produk terlaris...";
  const rows=(window.reportSalesRows||[]).filter(s=>s.status==="completed");
- const values=[0,0,0,0],qtys=[0,0,0,0];
+ const values=[0,0,0,0,0,0],qtys=[0,0,0,0,0,0];
  if(!rows.length){renderBestProducts([]);renderProductCharts(values,qtys);$("productChartStatus").textContent="Belum ada transaksi selesai dalam periode ini.";return;}
  const saleIds=rows.map(s=>s.id);
  // Query per batch untuk menghindari URL IN terlalu panjang.
@@ -595,7 +599,7 @@ async function loadProductAnalytics(){
  if(seq!==analyticsRequest)return;
  renderBestProducts(items);
  renderProductCharts(values,qtys);
- $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Produk di luar empat kategori tidak ditampilkan.";
+ $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Ayam Only tidak dimasukkan dalam kategori maupun Total QTY Ayam.";
 }
 
 // Batas sesi kasir mengikuti tanggal Asia/Jakarta, bukan zona waktu perangkat.
@@ -678,7 +682,7 @@ function menuPhotoCategory(name){
 }
 function renderProducts(){
  const emoji=p=>/sambal|saus|sauce/i.test(p.name)?'🌶️':/nasi/i.test(p.name)&&/ayam/i.test(p.name)?'🍗 🍚':/ayam/i.test(p.name)?'🍗':/nasi/i.test(p.name)?'🍚':'🍽️';
- $('products').innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),'id')}).map(p=>{
+ $('products').innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?6:x)-(y<0?6:y)||String(a.name).localeCompare(String(b.name),'id')}).map(p=>{
   const photo=menuCategoryImages[menuPhotoCategory(p.name)];
   // Foto mengikuti kartu produk masing-masing; tidak membuat menu/produk baru.
   // Nama potongan yang memang ada di database akan memakai foto potongan terkait.
@@ -728,7 +732,7 @@ async function refreshCashierAwareness(){
   let qty=0;const ids=completed.map(x=>x.id);
   for(let i=0;i<ids.length;i+=40){
    const items=await check(await sb.from('sale_items').select('product_name,qty').in('sale_id',ids.slice(i,i+40)).range(0,999));
-   for(const item of items)if([0,1].includes(classifyProduct(item.product_name)))qty+=Number(item.qty||0);
+   for(const item of items)if([0,1,2,3].includes(classifyProduct(item.product_name)))qty+=Number(item.qty||0);
   }
   if(seq!==cashierSummarySeq||user?.id!==uid)return;
   qtyEl.textContent=new Intl.NumberFormat('id-ID').format(qty);
