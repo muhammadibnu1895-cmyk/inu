@@ -249,12 +249,8 @@ body.dark-mode .product-media{background:#334155}
 .cashier-awareness-item{background:#fff5f6;border:1px solid #ffdbe1;border-radius:12px;padding:12px;min-width:0}
 .cashier-awareness-item small{display:block;font-size:12px;color:#8a3041;margin-bottom:6px}
 .cashier-awareness-item strong{display:block;font-size:clamp(16px,2vw,23px);overflow-wrap:anywhere;color:#b60927}
-/* Ilustrasi potongan ayam ditempatkan di dalam kartu produk, bukan baris terpisah. */
-.product-media.chicken-gallery{height:145px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;background:#fff0f2;padding:4px}
-.chicken-gallery .cut-photo{min-width:0;height:100%;position:relative;overflow:hidden;border-radius:8px;background:#f5dfe3}
-.chicken-gallery .cut-photo img{display:block;width:100%;height:100%;object-fit:cover}
-.chicken-gallery .cut-photo span{position:absolute;bottom:0;left:0;right:0;background:#101827bb;color:#fff;text-align:center;font-size:9px;font-weight:700;padding:5px 2px;line-height:1.2}
-@media(max-width:580px){.product-media.chicken-gallery{height:115px;gap:3px;padding:3px}.chicken-gallery .cut-photo span{font-size:8px;padding:4px 1px}}
+/* Setiap kartu produk hanya menampilkan satu foto ilustrasi, bukan galeri tiga foto. */
+.product-media .product-photo{object-fit:cover}
 body.dark-mode .cashier-awareness{background:#1f2937;border-color:#475569}
 body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 @media(max-width:520px){.cashier-awareness-grid{gap:6px}.cashier-awareness-item{padding:9px 7px}.cashier-awareness-item small{font-size:10px}.cashier-awareness-item strong{font-size:15px}}
@@ -670,6 +666,8 @@ const menuCategoryImages={
  rice:'https://res.cloudinary.com/dk0z4ums3/image/upload/v1762501417/attached_image/puasa-mutih-ini-yang-perlu-diketahui-sebelum-mencobanya.jpg',
  sambal:'https://fibercreme.com/wp-content/uploads/2025/06/delicious-meal-with-sambal-arrangement.webp'
 };
+// Placeholder kategori: ganti URL berikut dengan foto masing-masing potongan yang sudah disetujui.
+const menuCutImages={upper:menuCategoryImages.chicken,wing:menuCategoryImages.chicken,lower:menuCategoryImages.chicken};
 function menuPhotoCategory(name){
  const n=String(name||'');
  if(/nasi/i.test(n)&&/ayam/i.test(n))return 'meal';
@@ -682,11 +680,14 @@ function renderProducts(){
  const emoji=p=>/sambal|saus|sauce/i.test(p.name)?'🌶️':/nasi/i.test(p.name)&&/ayam/i.test(p.name)?'🍗 🍚':/ayam/i.test(p.name)?'🍗':/nasi/i.test(p.name)?'🍚':'🍽️';
  $('products').innerHTML=products.length?[...products].sort((a,b)=>{const x=classifyProduct(a.name),y=classifyProduct(b.name);return (x<0?4:x)-(y<0?4:y)||String(a.name).localeCompare(String(b.name),'id')}).map(p=>{
   const photo=menuCategoryImages[menuPhotoCategory(p.name)];
-  const isChicken=/ayam/i.test(p.name);
-  const cuts=['Dada / Paha Atas','Sayap','Paha Bawah'];
-  const positions=['15% 50%','50% 50%','85% 50%'];
-  const cutGallery=isChicken?`<span class="product-media chicken-gallery" aria-hidden="true">${cuts.map((cut,i)=>`<span class="cut-photo"><img src="${escapeHTML(menuCategoryImages.chicken)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" style="object-position:${positions[i]}" onerror="this.style.display='none'"><span>${cut}</span></span>`).join('')}</span>`:'';
-  return `<button class="product" data-product="${escapeHTML(p.id)}">${cutGallery||`<span class="product-media" aria-hidden="true"><span class="food-emoji">${emoji(p)}</span>${photo?`<img class="product-photo" src="${escapeHTML(photo)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}</span>`}<span class="plus-icon" aria-hidden="true">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`;
+  // Foto mengikuti kartu produk masing-masing; tidak membuat menu/produk baru.
+  // Nama potongan yang memang ada di database akan memakai foto potongan terkait.
+  const name=String(p.name||'');
+  const cutPhoto=/dada|paha\s*atas/i.test(name)?menuCutImages.upper:
+    /sayap/i.test(name)?menuCutImages.wing:
+    /paha\s*bawah/i.test(name)?menuCutImages.lower:null;
+  const cardPhoto=cutPhoto||photo;
+  return `<button class="product" data-product="${escapeHTML(p.id)}"><span class="product-media" aria-hidden="true"><span class="food-emoji">${emoji(p)}</span>${cardPhoto?`<img class="product-photo" src="${escapeHTML(cardPhoto)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden=true">`:''}</span><span class="plus-icon" aria-hidden="true">+</span><span class="product-info"><b>${escapeHTML(p.name)}</b><small>${rupiah(p.price)}</small></span></button>`;
  }).join(''):"<p class='muted'>Belum ada produk aktif.</p>";
 }
 
