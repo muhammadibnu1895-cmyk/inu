@@ -263,6 +263,7 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 .product-chart-table thead th{font-size:12px;font-weight:800;white-space:normal}
 .product-chart-table tbody td:not(:first-child){white-space:nowrap;font-size:13px;font-variant-numeric:tabular-nums}
 @media(max-width:700px){.product-chart-table{min-width:1040px;font-size:12px}.product-chart-table th,.product-chart-table td{padding:12px 8px}.product-chart-table tbody td:not(:first-child){font-size:12px}}
+.stat-card strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.daily-value{font-size:clamp(8px,1vw,11px);white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.2}.branch-modern-value{overflow-wrap:anywhere}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -456,7 +457,7 @@ function showView(view){
  window.scrollTo({top:0,behavior:"instant"});
 }
 document.querySelectorAll("#topNav [data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
-function compactMoney(n){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',notation:'compact',maximumFractionDigits:2}).format(Number(n)||0)}
+function compactMoney(n){return rupiah(n)} // Nominal rupiah penuh tanpa singkatan jt/rb
 function renderModernReport(rows,branchData){
  const hourly=reportPeriod==='today';
  const dates=new Map();
