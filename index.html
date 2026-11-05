@@ -286,7 +286,7 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 <div id="cashierAttendanceStatus" class="attendance-chip" hidden><strong>🕒 Absensi:</strong><span id="cashierAttendanceText">Memeriksa...</span><button type="button" id="retryAttendance" class="secondary" hidden>Coba Absen Lagi</button></div>
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><p class="muted small" id="autoRefreshInfo" role="status">Auto-refresh 30 detik saat aplikasi aktif.</p><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
-<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
+<div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong></div><div class="stat-card"><small>QTY Input Owner</small><strong id="reportOwnerQty">—</strong></div><div class="stat-card"><small>QTY Input Kasir</small><strong id="reportCashierQty">—</strong></div><div class="stat-card"><small>QTY Sumber Belum Teridentifikasi</small><strong id="reportUnknownQty">—</strong></div><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
 <div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
 <details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong><div class="muted small">Transaksi selesai pada periode pilihan</div></div></div>
@@ -534,7 +534,7 @@ async function loadReportPeriodData(){
  try{
   const all=[];let truncated=false;
   for(let offset=0;offset<10000;offset+=1000){
-   const page=await check(await sb.from("sales").select("id,branch_id,sold_at,payment_method,total,status").gte("sold_at",range.from).lt("sold_at",range.to).order("sold_at",{ascending:false}).range(offset,offset+999));
+   const page=await check(await sb.from("sales").select("id,branch_id,cashier_id,sold_at,payment_method,total,status").gte("sold_at",range.from).lt("sold_at",range.to).order("sold_at",{ascending:false}).range(offset,offset+999));
    if(seq!==reportFetchSeq)return;
    all.push(...page);
    if(page.length<1000)break;
@@ -588,10 +588,11 @@ async function loadProductAnalytics(){
  if(profile?.role!=="owner")return;
  const seq=++analyticsRequest;
  $("reportCombinedQty").textContent="Memuat...";
+ for(const id of ["reportOwnerQty","reportCashierQty","reportUnknownQty"])$(id).textContent="Memuat...";
  $("bestProducts").textContent="Memuat produk terlaris...";
  const rows=(window.reportSalesRows||[]).filter(s=>s.status==="completed");
  const values=[0,0,0,0,0,0],qtys=[0,0,0,0,0,0];
- if(!rows.length){renderBestProducts([]);renderProductCharts(values,qtys);$("productChartStatus").textContent="Belum ada transaksi selesai dalam periode ini.";return;}
+ if(!rows.length){renderBestProducts([]);renderProductCharts(values,qtys);for(const id of ["reportOwnerQty","reportCashierQty","reportUnknownQty"])$(id).textContent="0";$("productChartStatus").textContent="Belum ada transaksi selesai dalam periode ini.";return;}
  const saleIds=rows.map(s=>s.id);
  // Query per batch untuk menghindari URL IN terlalu panjang.
  let items=[];
@@ -607,9 +608,31 @@ async function loadProductAnalytics(){
   values[cat]+=q*Number(item.unit_price||0);
  }
  if(seq!==analyticsRequest)return;
+ // Klasifikasi berdasarkan akun pencatat (cashier_id), bukan pengguna yang sedang melihat.
+ // Akun yang tidak diketahui tetap masuk total, tetapi tidak ditebak sebagai Owner/Kasir.
+ const roleById=new Map();const accountIds=[...new Set(rows.map(x=>x.cashier_id).filter(Boolean))];
+ let roleLookupError=null;
+ try{
+  for(let i=0;i<accountIds.length;i+=40){
+   const accounts=await check(await sb.from('profiles').select('id,role').in('id',accountIds.slice(i,i+40)));
+   for(const account of accounts)roleById.set(account.id,account.role);
+  }
+ }catch(err){roleLookupError=err;}
+ if(seq!==analyticsRequest)return;
+ const saleRole=new Map(rows.map(x=>[x.id,roleById.get(x.cashier_id)||'unknown']));
+ const breakdown={owner:0,kasir:0,unknown:0};
+ for(const item of items){
+  if(![0,1,2,3].includes(classifyProduct(item.product_name)))continue;
+  const role=saleRole.get(item.sale_id);
+  breakdown[role==='owner'?'owner':role==='kasir'?'kasir':'unknown']+=Number(item.qty||0);
+ }
+ const fmt=n=>new Intl.NumberFormat('id-ID').format(n);
+ $('reportOwnerQty').textContent=roleLookupError?'—':fmt(breakdown.owner);
+ $('reportCashierQty').textContent=roleLookupError?'—':fmt(breakdown.kasir);
+ $('reportUnknownQty').textContent=roleLookupError?'—':fmt(breakdown.unknown);
  renderBestProducts(items);
  renderProductCharts(values,qtys);
- $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Ayam Only tidak dimasukkan dalam kategori maupun Total QTY Ayam.";
+ $("productChartStatus").textContent="Grafik berdasarkan transaksi selesai pada periode yang dipilih. Ayam Only tidak dimasukkan dalam kategori maupun Total QTY Ayam. Pembagian Owner/Kasir berdasarkan role akun saat ini; transaksi tanpa akun yang dikenal masuk kategori belum teridentifikasi."+(roleLookupError?" Gagal membaca role akun: "+String(roleLookupError.message||roleLookupError):"");
 }
 
 // Batas sesi kasir mengikuti tanggal Asia/Jakarta, bukan zona waktu perangkat.
