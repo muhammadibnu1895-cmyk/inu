@@ -264,6 +264,14 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 .product-chart-table tbody td:not(:first-child){white-space:nowrap;font-size:13px;font-variant-numeric:tabular-nums}
 @media(max-width:700px){.product-chart-table{min-width:1040px;font-size:12px}.product-chart-table th,.product-chart-table td{padding:12px 8px}.product-chart-table tbody td:not(:first-child){font-size:12px}}
 .stat-card strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.daily-value{font-size:clamp(8px,1vw,11px);white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.2}.branch-modern-value{overflow-wrap:anywhere}
+
+/* Monitoring ayam tahap 2 */
+.stock-panel{margin:14px 0;padding:16px;border:1px solid #e5e7eb;border-radius:16px;background:var(--card,#fff)}
+.stock-panel h3{margin:0 0 5px}.stock-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.stock-cell{border-radius:12px;background:#fff5f6;padding:12px;min-width:0}.stock-cell small{display:block;color:#7f1d1d;font-size:12px}.stock-cell strong{font-size:clamp(18px,2.5vw,27px);overflow-wrap:anywhere}
+.stock-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.stock-form label{flex:1;min-width:120px}.stock-form input,.stock-form select{width:100%}
+body.dark-mode .stock-panel{background:#1f2937;border-color:#475569}body.dark-mode .stock-cell{background:#3d2630}
+@media(max-width:520px){.stock-grid{gap:6px}.stock-cell{padding:8px}.stock-cell strong{font-size:18px}}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -287,7 +295,7 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><p class="muted small" id="autoRefreshInfo" role="status">Auto-refresh 30 detik saat aplikasi aktif.</p><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
 <div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong></div><div class="stat-card"><small>QTY Input Owner</small><strong id="reportOwnerQty">—</strong></div><div class="stat-card"><small>QTY Input Kasir</small><strong id="reportCashierQty">—</strong></div><span id="reportUnknownQty" hidden aria-hidden="true"></span><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
-<div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
+<section class="stock-panel" id="stockMonitor" aria-label="Monitoring stok ayam hari ini"><h3>🍗 Monitoring Stok Ayam · Hari Ini (WIB)</h3><p class="muted small">Satu cabang · seluruh penjualan Owner dan Kasir · transaksi completed · data tersinkron.</p><label id="stockBranchWrap" hidden>Cabang monitoring <select id="stockBranch"></select></label><div class="stock-grid"><div class="stock-cell"><small>Total Digoreng</small><strong id="stockProduced">—</strong></div><div class="stock-cell"><small>Total Terjual</small><strong id="stockSold">—</strong></div><div class="stock-cell"><small>Perkiraan Sisa</small><strong id="stockRemaining">—</strong></div></div><p id="stockStatus" class="muted small" role="status">Menunggu data...</p><div id="stockOwnerArea" hidden><h4>Input Ayam Digoreng (Owner)</h4><form id="stockForm" class="stock-form"><label>Jumlah (pcs)<input id="stockQty" type="number" min="1" max="10000" step="1" required></label><label>Batch<select id="stockBatch"><option>Pagi</option><option>Siang</option><option>Sore</option><option>Lainnya</option></select></label><label>Catatan<input id="stockNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="stockSave">+ Tambah Produksi</button></form><p class="muted small">Setiap simpan menambahkan batch baru, bukan mengganti total sebelumnya.</p></div></section><div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
 <details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong><div class="muted small">Transaksi selesai pada periode pilihan</div></div></div>
 <section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
@@ -437,7 +445,18 @@ function updateCash(){
  $("pay").disabled=busy||!cart.size||!$("branch").value||(cash&&!valid);
 }
 let currentView=null;
+function placeStockMonitor(view){
+ const panel=$('stockMonitor');if(!panel)return;
+ if(view==='transaction'&&profile?.role==='kasir')$('transactionArea').prepend(panel);
+ else if(view==='report'&&profile?.role==='owner')$('reportPanel').insertBefore(panel,$('reportPanel').querySelector('.report-grid-modern'));
+ panel.hidden=!((view==='transaction'&&profile?.role==='kasir')||(view==='report'&&profile?.role==='owner'));
+ $('stockOwnerArea').hidden=profile?.role!=='owner';
+ $('stockBranchWrap').hidden=profile?.role!=='owner';
+ if(profile?.role==='owner'){const select=$('stockBranch');const old=select.value;select.innerHTML=branches.map(b=>`<option value="${escapeHTML(b.id)}">${escapeHTML(b.name)}</option>`).join('');select.value=branches.some(b=>b.id===old)?old:($('branch').value||branches[0]?.id||'');}
+ if(!panel.hidden)refreshStockMonitor().catch(console.warn);
+}
 function showView(view){
+ placeStockMonitor(view);
  if(!profile)return;
  const owner=profile.role==="owner";
  const valid=["report","transaction","recent","products","management","pin","attendance","salary","export","import"];
@@ -1236,6 +1255,38 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+
+// Tahap 2: monitoring server-side per cabang. UI tidak menghitung stok dari localStorage.
+let stockRequestSeq=0;
+async function refreshStockMonitor(){
+ if(!user||!profile||!['owner','kasir'].includes(profile.role))return;
+ const branchId=profile.role==='kasir'?profile.branch_id:$('stockBranch').value;
+ if(!branchId){$('stockStatus').textContent='Pilih cabang terlebih dahulu.';return;}
+ const seq=++stockRequestSeq, uid=user.id;
+ try{
+  const {data,error}=await sb.rpc('inu_chicken_stock_today',{p_branch_id:branchId});
+  if(error)throw error;
+  if(seq!==stockRequestSeq||user?.id!==uid)return;
+  const row=Array.isArray(data)?data[0]:data;
+  if(!row)throw Error('Data stok kosong');
+  $('stockProduced').textContent=Number(row.produced).toLocaleString('id-ID')+' pcs';
+  $('stockSold').textContent=Number(row.sold).toLocaleString('id-ID')+' pcs';
+  $('stockRemaining').textContent=Number(row.remaining).toLocaleString('id-ID')+' pcs';
+  $('stockStatus').textContent='Terakhir sinkron '+new Date().toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta'})+' WIB'+(Number(row.unclassified_sold)>0?' · '+row.unclassified_sold+' pcs dari akun belum terklasifikasi':'')+(Number(row.remaining)<0?' · PERIKSA: terjual melebihi produksi tercatat':'');
+ }catch(e){if(seq!==stockRequestSeq)return;['stockProduced','stockSold','stockRemaining'].forEach(id=>$(id).textContent='—');$('stockStatus').textContent='Belum dapat memuat stok: '+e.message+' · Pastikan SQL Tahap 2 sudah dipasang.';}
+}
+$('stockForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(profile?.role!=='owner')return;
+ const qty=Number($('stockQty').value),branchId=$('stockBranch').value;
+ if(!Number.isInteger(qty)||qty<1||qty>10000||!branchId)return;
+ const btn=$('stockSave');btn.disabled=true;
+ try{
+  await check(await sb.rpc('inu_owner_add_fry_batch',{p_branch_id:branchId,p_qty:qty,p_batch_label:$('stockBatch').value,p_note:$('stockNote').value.trim()}));
+  $('stockQty').value='';$('stockNote').value='';message('Produksi ayam berhasil ditambahkan.');await refreshStockMonitor();
+ }catch(err){message('Gagal menyimpan produksi: '+err.message,true)}finally{btn.disabled=false}
+});
+$('stockBranch').addEventListener('change',()=>{if(profile?.role==='owner')refreshStockMonitor().catch(console.warn)});
+
 // Refresh data tanpa reload halaman. Keranjang aktif tidak diganti harga/produknya.
 let dataAutoRefreshBusy=false,dataAutoRefreshLast=0;
 async function refreshActiveData(){
@@ -1258,6 +1309,7 @@ async function refreshActiveData(){
   if(currentView==='report'&&profile.role==='owner'&&!reportLoadActive)await loadReportPeriod();
   else if(currentView==='transaction'&&profile.role==='kasir')await refreshCashierAwareness();
   else if(currentView==='recent')await loadSales();
+  if((currentView==='report'&&profile.role==='owner')||(currentView==='transaction'&&profile.role==='kasir'))await refreshStockMonitor();
   if(user?.id===sessionUser){
    $('autoRefreshInfo').textContent='Auto-refresh 30 detik · Terakhir diperbarui '+new Date().toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour12:false})+' WIB';
   }
