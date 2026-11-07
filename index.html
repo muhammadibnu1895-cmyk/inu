@@ -295,7 +295,7 @@ body.dark-mode .stock-panel{background:#1f2937;border-color:#475569}body.dark-mo
 <div id="offlineStrip" class="offline-strip" hidden><strong id="offlineStatus">Memeriksa koneksi...</strong><span id="offlineQueueCount">0 transaksi tertunda</span><button type="button" id="offlineDetails" class="secondary">Lihat Antrean</button><div id="offlineQueueList" style="width:100%" hidden></div></div><div id="notice" role="status" aria-live="polite"></div>
 <section id="reportPanel" hidden><div class="view-title"><div><h2>Dashboard</h2><p class="muted"><span id="dashboardDate"></span></p></div><span class="tag" id="reportScope">Hari ini</span></div><p class="muted small" id="autoRefreshInfo" role="status">Auto-refresh 30 detik saat aplikasi aktif.</p><div class="report-filters" id="reportFilters"><button type="button" data-period="today" class="active">Hari Ini</button><button type="button" data-period="seven">7 Hari Terakhir</button><button type="button" data-period="week">Minggu Ini</button><button type="button" data-period="month">Bulan Ini</button><button type="button" data-period="custom">📅 Tanggal Bebas</button></div><form id="reportCustomDates" hidden><label>Dari tanggal<input id="reportCustomStart" type="date" required></label><label>Sampai tanggal<input id="reportCustomEnd" type="date" required></label><button type="submit">Tampilkan Report</button></form><p id="reportDateError" class="error mini" role="alert" hidden></p>
 <div class="stat-grid"><div class="stat-card orange"><small>Omzet</small><strong id="reportRevenue">Rp 0</strong></div><div class="stat-card"><small>Total QTY Ayam</small><strong id="reportCombinedQty">—</strong></div><div class="stat-card"><small>QTY Input Owner</small><strong id="reportOwnerQty">—</strong></div><div class="stat-card"><small>QTY Input Kasir</small><strong id="reportCashierQty">—</strong></div><span id="reportUnknownQty" hidden aria-hidden="true"></span><div class="stat-card"><small>Tunai</small><strong id="reportCash">Rp 0</strong></div><div class="stat-card"><small>QRIS</small><strong id="reportNoncash">Rp 0</strong></div></div>
-<section class="stock-panel" id="stockMonitor" aria-label="Monitoring stok ayam hari ini"><h3>🍗 Monitoring Stok Ayam · Hari Ini (WIB)</h3><p class="muted small">Satu cabang · seluruh penjualan Owner dan Kasir · transaksi completed · data tersinkron.</p><label id="stockBranchWrap" hidden>Cabang monitoring <select id="stockBranch"></select></label><div class="stock-grid"><div class="stock-cell"><small>Total Digoreng</small><strong id="stockProduced">—</strong></div><div class="stock-cell"><small>Total Terjual</small><strong id="stockSold">—</strong></div><div class="stock-cell"><small>Perkiraan Sisa</small><strong id="stockRemaining">—</strong></div></div><p id="stockStatus" class="muted small" role="status">Menunggu data...</p><div id="stockOwnerArea" hidden><h4>Input Ayam Digoreng (Owner)</h4><form id="stockForm" class="stock-form"><label>Jumlah (pcs)<input id="stockQty" type="number" min="1" max="10000" step="1" required></label><label>Batch<select id="stockBatch"><option>Pagi</option><option>Siang</option><option>Sore</option><option>Lainnya</option></select></label><label>Catatan<input id="stockNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="stockSave">+ Tambah Produksi</button></form><p class="muted small">Setiap simpan menambahkan batch baru, bukan mengganti total sebelumnya.</p></div></section><div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
+<section class="stock-panel" id="stockMonitor" aria-label="Monitoring stok ayam hari ini"><h3>🍗 Monitoring Stok Ayam · Hari Ini (WIB)</h3><p class="muted small">Satu cabang · seluruh penjualan Owner dan Kasir · transaksi completed · data tersinkron.</p><label id="stockBranchWrap" hidden>Cabang monitoring <select id="stockBranch"></select></label><div class="stock-grid"><div class="stock-cell"><small>Total Digoreng</small><strong id="stockProduced">—</strong></div><div class="stock-cell"><small>Total Terjual</small><strong id="stockSold">—</strong></div><div class="stock-cell"><small>Perkiraan Sisa</small><strong id="stockRemaining">—</strong></div></div><p id="stockStatus" class="muted small" role="status">Menunggu data...</p><div id="stockOwnerArea" hidden><h4>Input Ayam Digoreng (Owner)</h4><form id="stockForm" class="stock-form"><label>Jumlah (pcs)<input id="stockQty" type="number" min="1" max="10000" step="1" required></label><label>Batch<select id="stockBatch"><option>Pagi</option><option>Siang</option><option>Sore</option><option>Lainnya</option></select></label><label>Catatan<input id="stockNote" maxlength="250" placeholder="Opsional"></label><button type="submit" id="stockSave">+ Tambah Produksi</button></form><p class="muted small">Setiap simpan menambahkan batch baru, bukan mengganti total sebelumnya.</p><h4>Riwayat Produksi Hari Ini</h4><p class="muted small">Owner dapat koreksi atau batalkan input produksi. Riwayat perubahan tersimpan.</p><div id="fryHistoryStatus" class="muted small">Memuat riwayat...</div><div id="fryHistoryList" style="display:grid;gap:8px"></div></div></section><div class="report-grid-modern"><section class="panel"><div class="flex" style="justify-content:space-between"><h3 id="dailyChartTitle">Penjualan Hari Ini</h3><span class="chart-legend"><span><i class="legend-dot"></i>Tunai</span><span><i class="legend-dot qris"></i>QRIS</span></span></div><div id="modernDailyChart" class="daily-chart" aria-label="Grafik batang penjualan harian"></div></section></div>
 <section class="panel best-products"><h3>5 Produk Terlaris</h3><div id="bestProducts"></div><p class="muted small">Berdasarkan jumlah produk terjual pada periode pilihan.</p></section>
 <details id="reportDetails"><summary>Lihat Detail Laporan <span aria-hidden="true">⌄</span></summary><p class="muted small">Cabang, kategori produk &amp; rincian penjualan</p><div class="report-details-content"><section class="panel"><h3>🏬 Penjualan per Cabang</h3><div id="modernBranchChart" class="branch-modern"></div></section><div class="stat-grid" style="margin-top:14px"><div class="stat-card orange"><small>Jumlah Transaksi</small><strong id="reportCount">0</strong><div class="muted small">Transaksi selesai pada periode pilihan</div></div></div>
 <section class="panel" style="margin-top:16px"><h3>Penjualan per Cabang</h3><div id="reportBranchBars" class="branch-chart-wrap" aria-label="Grafik batang penjualan per cabang"></div></section>
@@ -1272,6 +1272,7 @@ async function refreshStockMonitor(){
   $('stockProduced').textContent=Number(row.produced).toLocaleString('id-ID')+' pcs';
   $('stockSold').textContent=Number(row.sold).toLocaleString('id-ID')+' pcs';
   $('stockRemaining').textContent=Number(row.remaining).toLocaleString('id-ID')+' pcs';
+  if(profile?.role==='owner')loadFryHistory().catch(console.warn);
   $('stockStatus').textContent='Terakhir sinkron '+new Date().toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta'})+' WIB'+(Number(row.unclassified_sold)>0?' · '+row.unclassified_sold+' pcs dari akun belum terklasifikasi':'')+(Number(row.remaining)<0?' · PERIKSA: terjual melebihi produksi tercatat':'');
  }catch(e){if(seq!==stockRequestSeq)return;['stockProduced','stockSold','stockRemaining'].forEach(id=>$(id).textContent='—');$('stockStatus').textContent='Belum dapat memuat stok: '+e.message+' · Pastikan SQL Tahap 2 sudah dipasang.';}
 }
@@ -1287,6 +1288,44 @@ $('stockForm').addEventListener('submit',async e=>{
 });
 $('stockBranch').addEventListener('change',()=>{if(profile?.role==='owner')refreshStockMonitor().catch(console.warn)});
 
+// Tahap 3: riwayat, edit, dan batalkan produksi khusus Owner.
+let fryHistoryRows=[];
+async function loadFryHistory(){
+ if(profile?.role!=='owner')return;
+ const branchId=$('stockBranch').value;
+ if(!branchId)return;
+ const status=$('fryHistoryStatus'), list=$('fryHistoryList');
+ status.textContent='Memuat riwayat...';list.replaceChildren();
+ try{
+  const {data,error}=await sb.rpc('inu_owner_list_fry_batches',{p_branch_id:branchId});
+  if(error)throw error;
+  fryHistoryRows=Array.isArray(data)?data:[];
+  status.textContent=fryHistoryRows.length?fryHistoryRows.length+' batch produksi aktif hari ini':'Belum ada produksi hari ini.';
+  for(const batch of fryHistoryRows){
+   const wrap=document.createElement('div');wrap.style.cssText='padding:10px;border:1px solid var(--line,#ddd);border-radius:10px';
+   const summary=document.createElement('div');
+   const when=new Date(batch.created_at).toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit'});
+   summary.textContent=when+' WIB · '+batch.batch_label+' · '+batch.qty+' pcs'+(batch.note?' · '+batch.note:'');
+   const edit=document.createElement('button');edit.type='button';edit.textContent='Edit';edit.style.marginRight='8px';
+   edit.addEventListener('click',async()=>{
+    const input=prompt('Koreksi jumlah produksi (pcs):',String(batch.qty));if(input===null)return;
+    if(!/^[0-9]+$/.test(input.trim())||Number(input)<1||Number(input)>10000){message('Jumlah harus 1–10000 pcs.',true);return}
+    if(!confirm('Ubah produksi '+batch.qty+' menjadi '+Number(input)+' pcs?'))return;
+    edit.disabled=true;
+    try{await check(await sb.rpc('inu_owner_edit_fry_batch',{p_id:batch.id,p_qty:Number(input)}));message('Produksi berhasil dikoreksi.');await refreshStockMonitor()}
+    catch(err){message('Gagal edit produksi: '+err.message,true)}finally{edit.disabled=false}
+   });
+   const del=document.createElement('button');del.type='button';del.textContent='Batalkan';
+   del.addEventListener('click',async()=>{
+    if(!confirm('Batalkan batch '+batch.qty+' pcs? Produksi akan dikeluarkan dari total, tetapi riwayat audit tetap tersimpan.'))return;
+    del.disabled=true;
+    try{await check(await sb.rpc('inu_owner_delete_fry_batch',{p_id:batch.id}));message('Batch produksi dibatalkan.');await refreshStockMonitor()}
+    catch(err){message('Gagal membatalkan produksi: '+err.message,true)}finally{del.disabled=false}
+   });
+   wrap.append(summary,edit,del);list.append(wrap);
+  }
+ }catch(err){status.textContent='Gagal memuat riwayat: '+err.message}
+}
 // Refresh data tanpa reload halaman. Keranjang aktif tidak diganti harga/produknya.
 let dataAutoRefreshBusy=false,dataAutoRefreshLast=0;
 async function refreshActiveData(){
