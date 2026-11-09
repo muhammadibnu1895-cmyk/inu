@@ -323,6 +323,31 @@ body.dark-mode #stockMonitor .stock-cell:last-child{background:#4c1d2b;border-co
 @keyframes stock-alert-pulse{50%{box-shadow:0 0 0 3px #fda4af55}}
 @media(prefers-reduced-motion:reduce){#stockMonitor .stock-cell.stock-low{animation:none}}
 @media(max-width:700px){#reportPanel>.inu-summary-grid .stat-card{padding:12px 10px;min-height:106px}#reportPanel>.inu-summary-grid .inu-kpi-icon{position:static;width:29px;height:29px;border-radius:8px;margin-bottom:6px}#reportPanel>.inu-summary-grid .inu-kpi-icon svg{width:18px;height:18px}#reportPanel>.inu-summary-grid .stat-card strong{font-size:clamp(16px,4.5vw,22px)!important}#stockMonitor{padding:13px}#stockMonitor .stock-cell{padding:9px 7px}#stockMonitor .stock-cell small{font-size:10px}#stockMonitor .stock-cell strong{font-size:19px}}
+
+/* Kasir ringkas: omzet akun, potongan ayam, monitoring stok cabang */
+#transactionArea .cashier-awareness{padding:14px 16px;margin:0 0 10px}
+.cashier-summary-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cashier-summary-head h3{margin:0;font-size:15px}
+.cashier-summary-head span{font-size:11px;color:#64748b}
+#transactionArea #cashierAwarenessScope{font-size:11px;margin:6px 0 10px}
+#transactionArea .cashier-awareness-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#transactionArea .cashier-awareness-item{padding:12px;background:#f8fafc;border:1px solid #e8edf3}
+#transactionArea .cashier-awareness-item small{color:#64748b;font-size:11px}
+#transactionArea .cashier-awareness-item strong{color:#18233b;font-size:clamp(17px,2vw,23px)}
+.cashier-payment-details{margin-top:10px;font-size:12px}
+.cashier-payment-details summary{cursor:pointer;color:#b91c1c;font-weight:650}
+.cashier-payment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}
+.cashier-payment-grid>div{background:#fff5f6;border-radius:9px;padding:9px;display:grid;gap:4px}
+.cashier-payment-grid small{color:#64748b}.cashier-payment-grid strong{font-size:15px}
+#transactionArea #stockMonitor{margin:0 0 14px;padding:12px 15px}
+#transactionArea #stockMonitor .inu-stock-heading h3{font-size:15px}
+#transactionArea #stockMonitor .stock-grid{gap:7px;margin:9px 0}
+#transactionArea #stockMonitor .stock-cell{padding:9px}
+#transactionArea #stockMonitor .stock-cell small{font-size:10px}
+#transactionArea #stockMonitor .stock-cell strong{font-size:clamp(15px,2vw,21px)}
+body.dark-mode #transactionArea .cashier-awareness-item{background:#273244;border-color:#475569}
+body.dark-mode #transactionArea .cashier-awareness-item strong{color:#f8fafc}
+@media(max-width:520px){#transactionArea .cashier-awareness{padding:12px}#transactionArea #stockMonitor{padding:11px}#transactionArea #stockMonitor .stock-cell{padding:8px 5px}#transactionArea #stockMonitor .stock-cell strong{font-size:15px}}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -358,8 +383,8 @@ body.dark-mode #stockMonitor .stock-cell:last-child{background:#4c1d2b;border-co
 <p class="muted small">Laporan mengikuti periode pilihan (WIB) dan hanya menghitung transaksi completed. Bila data melebihi batas pengambilan, akan ada peringatan.</p></section>
 <div id="transactionArea">
 <section class="cashier-awareness" id="cashierAwareness" aria-label="Ringkasan transaksi kasir hari ini">
-<h3>📊 Ringkasan Kasir Hari Ini</h3><p id="cashierAwarenessScope">Transaksi selesai hari ini (WIB), hanya penjualan akun Kasir ini. Transaksi offline tertunda belum dihitung.</p>
-<div class="cashier-awareness-grid"><div class="cashier-awareness-item"><small>Total QTY Ayam</small><strong id="cashierTodayQty">—</strong></div><div class="cashier-awareness-item"><small>Total Tunai</small><strong id="cashierTodayCash">—</strong></div><div class="cashier-awareness-item"><small>Total QRIS</small><strong id="cashierTodayQris">—</strong></div></div></section>
+<div class="cashier-summary-head"><h3>📊 Ringkasan Kasir</h3><span>Hari ini · WIB</span></div><p id="cashierAwarenessScope">Transaksi selesai hari ini (WIB), hanya penjualan akun Kasir ini. Transaksi offline tertunda belum dihitung.</p>
+<div class="cashier-awareness-grid"><div class="cashier-awareness-item"><small>💰 Omzet Kasir</small><strong id="cashierTodayRevenue">—</strong></div><div class="cashier-awareness-item"><small>🍗 Ayam Terjual</small><strong id="cashierTodayQty">—</strong></div></div><details class="cashier-payment-details"><summary>Rincian pembayaran</summary><div class="cashier-payment-grid"><div><small>Tunai</small><strong id="cashierTodayCash">—</strong></div><div><small>QRIS</small><strong id="cashierTodayQris">—</strong></div></div></details></section>
 <div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
@@ -499,7 +524,7 @@ function updateCash(){
 let currentView=null;
 function placeStockMonitor(view){
  const panel=$('stockMonitor');if(!panel)return;
- if(view==='transaction'&&profile?.role==='kasir')$('transactionArea').prepend(panel);
+ if(view==='transaction'&&profile?.role==='kasir')$('cashierAwareness').insertAdjacentElement('afterend',panel);
  else if(view==='report'&&profile?.role==='owner')$('reportPanel').insertBefore(panel,$('reportPanel').querySelector('.report-grid-modern'));
  panel.hidden=!((view==='transaction'&&profile?.role==='kasir')||(view==='report'&&profile?.role==='owner'));
  $('stockOwnerArea').hidden=profile?.role!=='owner';
@@ -823,7 +848,7 @@ let cashierSummarySeq=0;
 async function refreshCashierAwareness(){
  if(!profile||!user)return;
  const seq=++cashierSummarySeq, uid=user.id;
- const qtyEl=$("cashierTodayQty"),cashEl=$("cashierTodayCash"),qrisEl=$("cashierTodayQris"),scope=$("cashierAwarenessScope");
+ const qtyEl=$("cashierTodayQty"),cashEl=$("cashierTodayCash"),qrisEl=$("cashierTodayQris"),revenueEl=$("cashierTodayRevenue"),scope=$("cashierAwarenessScope");
  if(profile.role!=="kasir"){$("cashierAwareness").hidden=true;return;}
  $("cashierAwareness").hidden=false;
  const today=jakartaDate(),tomorrow=new Date(today);tomorrow.setUTCDate(tomorrow.getUTCDate()+1);
@@ -837,7 +862,7 @@ async function refreshCashierAwareness(){
   if(seq!==cashierSummarySeq||user?.id!==uid)return;
   const completed=sales.filter(x=>x.status==='completed');
   const total=(method)=>completed.filter(x=>x.payment_method===method).reduce((n,x)=>n+Number(x.total||0),0);
-  cashEl.textContent=rupiah(total('tunai'));qrisEl.textContent=rupiah(total('non_tunai'));
+  cashEl.textContent=rupiah(total('tunai'));qrisEl.textContent=rupiah(total('non_tunai'));revenueEl.textContent=rupiah(completed.reduce((n,x)=>n+Number(x.total||0),0));
   let qty=0;const ids=completed.map(x=>x.id);
   for(let i=0;i<ids.length;i+=40){
    const items=await check(await sb.from('sale_items').select('product_name,qty').in('sale_id',ids.slice(i,i+40)).range(0,999));
@@ -846,7 +871,7 @@ async function refreshCashierAwareness(){
   if(seq!==cashierSummarySeq||user?.id!==uid)return;
   qtyEl.textContent=new Intl.NumberFormat('id-ID').format(qty);
   scope.textContent='Transaksi selesai hari ini (WIB) oleh akun Kasir ini · Belum termasuk transaksi offline tertunda'+(sales.length>=10000?' · Data mungkin belum lengkap':'');
- }catch(e){if(seq!==cashierSummarySeq)return;qtyEl.textContent=cashEl.textContent=qrisEl.textContent='—';scope.textContent='Ringkasan belum dapat dimuat: '+String(e?.message||e);}
+ }catch(e){if(seq!==cashierSummarySeq)return;qtyEl.textContent=cashEl.textContent=qrisEl.textContent=revenueEl.textContent='—';scope.textContent='Ringkasan belum dapat dimuat: '+String(e?.message||e);}
 }
 let salesLoadSeq=0;
 async function loadSales(){
