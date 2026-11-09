@@ -348,6 +348,35 @@ body.dark-mode #stockMonitor .stock-cell:last-child{background:#4c1d2b;border-co
 body.dark-mode #transactionArea .cashier-awareness-item{background:#273244;border-color:#475569}
 body.dark-mode #transactionArea .cashier-awareness-item strong{color:#f8fafc}
 @media(max-width:520px){#transactionArea .cashier-awareness{padding:12px}#transactionArea #stockMonitor{padding:11px}#transactionArea #stockMonitor .stock-cell{padding:8px 5px}#transactionArea #stockMonitor .stock-cell strong{font-size:15px}}
+
+/* Transaksi cepat: kontrol jumlah satu sentuhan, ringkas untuk kasir HP */
+#cashierCheckout .quick-qty{display:inline-flex;align-items:center;gap:4px;background:#f4f6f9;border:1px solid #e2e8f0;border-radius:11px;padding:3px;white-space:nowrap}
+#cashierCheckout .quick-qty button{display:grid;place-items:center;min-width:32px;width:32px;height:34px;padding:0;border-radius:8px;font-size:20px;font-weight:800;background:#fff;color:#c91424;border:1px solid #e2e8f0;box-shadow:none}
+#cashierCheckout .quick-qty button:disabled{opacity:.4}
+#cashierCheckout .quick-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800}
+#cashierCheckout #cart table{width:100%}
+#cashierCheckout #cart td{vertical-align:middle}
+#transactionArea #products .product{cursor:pointer}
+#transactionArea #products .product:active{transform:scale(.98)}
+@media(max-width:700px){
+ #transactionArea .menu-banner{margin-bottom:10px}
+ #transactionArea .menu-banner p{font-size:11px}
+ #transactionArea .products{gap:8px}
+ #transactionArea .product{min-height:0}
+ #transactionArea .product-media{height:90px}
+ #transactionArea .product-info{padding:8px}
+ #transactionArea .product-info b{font-size:12px}
+ #transactionArea .menu-photo-note{font-size:10px}
+ #cashierCheckout #cart td:nth-child(2){width:115px}
+ #cashierCheckout #cart td:last-child{width:88px;font-size:12px;text-align:right}
+ #cashierCheckout .quick-qty{gap:2px;padding:2px}
+ #cashierCheckout .quick-qty button{width:29px;min-width:29px;height:32px}
+ #cashierCheckout .quick-qty span{min-width:20px}
+ .mobile-cart-bar button{background:#c91424;color:white;font-weight:800;border-radius:11px}
+}
+body.dark-mode #cashierCheckout .quick-qty{background:#263244;border-color:#475569}
+body.dark-mode #cashierCheckout .quick-qty button{background:#364152;border-color:#475569;color:#fda4af}
+
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -385,12 +414,12 @@ body.dark-mode #transactionArea .cashier-awareness-item strong{color:#f8fafc}
 <section class="cashier-awareness" id="cashierAwareness" aria-label="Ringkasan transaksi kasir hari ini">
 <div class="cashier-summary-head"><h3>📊 Ringkasan Kasir</h3><span>Hari ini · WIB</span></div><p id="cashierAwarenessScope">Transaksi selesai hari ini (WIB), hanya penjualan akun Kasir ini. Transaksi offline tertunda belum dihitung.</p>
 <div class="cashier-awareness-grid"><div class="cashier-awareness-item"><small>💰 Omzet Kasir</small><strong id="cashierTodayRevenue">—</strong></div><div class="cashier-awareness-item"><small>🍗 Ayam Terjual</small><strong id="cashierTodayQty">—</strong></div></div><details class="cashier-payment-details"><summary>Rincian pembayaran</summary><div class="cashier-payment-grid"><div><small>Tunai</small><strong id="cashierTodayCash">—</strong></div><div><small>QRIS</small><strong id="cashierTodayQris">—</strong></div></div></details></section>
-<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>Keranjang</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
+<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>🛒 Keranjang Pesanan</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Transaksi disimpan dahulu di perangkat, lalu disinkronkan. Jangan hapus data browser sebelum antrean kosong.</p></section></div>
-<div class="mobile-cart-bar" aria-label="Ringkasan keranjang"><div aria-live="polite"><small id="mobileCartCount">0 item</small><strong id="mobileCartTotal">Rp 0</strong></div><button type="button" id="mobileCheckout" disabled>Bayar ↓</button></div>
+<div class="mobile-cart-bar" aria-label="Ringkasan keranjang"><div aria-live="polite"><small id="mobileCartCount">0 item</small><strong id="mobileCartTotal">Rp 0</strong></div><button type="button" id="mobileCheckout" disabled>Bayar →</button></div>
 </div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><p id="salesReadStatus" class="muted small" role="status">Menunggu data penjualan...</p><button type="button" id="salesRefresh" class="secondary" style="margin-bottom:12px">↻ Muat Penjualan</button><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th><th id="salesActionHeading">Aksi Owner</th></tr></thead><tbody id="sales"></tbody></table></div><div id="saleEditor" class="panel" hidden style="margin-top:15px;border:2px solid #fed7aa"><h3>✏️ Edit Transaksi</h3><p id="saleEditInfo" class="muted mini"></p><form id="saleEditForm"><label>Metode pembayaran <select id="saleEditMethod"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="saleEditItems" style="margin:12px 0"></div><button type="button" class="secondary" id="saleAddItem">+ Tambah Produk</button><p><strong id="saleEditTotal">Total: Rp0</strong></p><label>Alasan perubahan <input id="saleEditReason" maxlength="250" required style="width:100%" placeholder="Contoh: koreksi jumlah pesanan"></label><p class="flex"><button type="submit" id="saleEditSave">Simpan Perubahan</button><button type="button" class="secondary" id="saleEditCancel">Batal</button></p></form><p id="saleEditStatus" role="status"></p></div></section>
 <section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang saat Keluar atau pergantian hari pukul 00.00 WIB. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th><th>Aksi Owner</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
 <dialog id="attendanceEditDialog" class="attendance-dialog"><form id="attendanceEditForm"><h3>Edit Absensi Kasir</h3><p id="attendanceEditWho" class="muted mini"></p><label>Tanggal kerja<input id="attendanceEditDate" type="date" required></label><label>Jam masuk (WIB)<input id="attendanceEditIn" type="datetime-local" required></label><label>Jam pulang (WIB, opsional)<input id="attendanceEditOut" type="datetime-local"></label><label>Alasan perubahan<input id="attendanceEditReason" minlength="5" maxlength="300" required placeholder="Minimal 5 karakter"></label><p id="attendanceEditError" class="error mini" role="alert"></p><div class="flex"><button type="button" class="secondary" id="attendanceEditCancel">Batal</button><button type="submit" id="attendanceEditSave">Simpan Perubahan</button></div></form></dialog>
@@ -835,7 +864,7 @@ $('mobileCheckout').onclick=()=>{
 };
 function renderCart(){
  let sum=0;let rows="";
- for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><input class="qty" data-qty="${escapeHTML(id)}" type="number" min="0" max="999" value="${qty}"></td><td>${rupiah(Number(p.price)*qty)}</td></tr>`}
+ for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><div class="quick-qty"><button type="button" data-qty-step="-1" data-id="${escapeHTML(id)}" aria-label="Kurangi ${escapeHTML(p.name)}" ${busy?"disabled":""}>−</button><span aria-label="Jumlah ${qty}">${qty}</span><button type="button" data-qty-step="1" data-id="${escapeHTML(id)}" aria-label="Tambah ${escapeHTML(p.name)}" ${busy||qty>=999?"disabled":""}>+</button></div></td><td>${rupiah(Number(p.price)*qty)}</td></tr>`}
  $("cart").innerHTML=rows?`<table><tbody>${rows}</tbody></table>`:"<p class='muted'>Belum ada produk dipilih.</p>";
  $("total").textContent=rupiah(sum);
  $('mobileCartCount').textContent=[...cart.values()].reduce((n,qty)=>n+qty,0)+' item';
@@ -981,6 +1010,7 @@ $("headerReload").onclick=async()=>{
 $("headerLogout").onclick=()=>$("logout").click();
 $("themeToggle").onclick=()=>{const dark=document.body.classList.toggle("dark-mode");$("themeToggle").textContent=dark?"☀":"☾";$("themeToggle").title=dark?"Mode terang":"Mode malam";$("themeToggle").setAttribute("aria-label",dark?"Mode terang":"Mode malam");};
 $("products").addEventListener("click",e=>{const btn=e.target.closest("[data-product]");if(!btn||busy)return;const id=btn.dataset.product;const qty=cart.get(id)||0;if(qty>=999)return;cart.set(id,qty+1);resetRequest();renderCart()});
+$("cart").addEventListener("click",e=>{const btn=e.target.closest("[data-qty-step]");if(!btn||busy)return;const id=btn.dataset.id,step=Number(btn.dataset.qtyStep),next=(cart.get(id)||0)+step;if(!Number.isInteger(next)||next<0||next>999)return;if(next===0)cart.delete(id);else cart.set(id,next);resetRequest();renderCart()});
 $("cart").addEventListener("change",e=>{if(!e.target.matches("[data-qty]")||busy)return;const id=e.target.dataset.qty,qty=Number(e.target.value);if(!Number.isInteger(qty)||qty<0||qty>999){renderCart();return}if(qty===0)cart.delete(id);else cart.set(id,qty);resetRequest();renderCart()});
 document.querySelectorAll("[data-cash]").forEach(btn=>btn.addEventListener("click",()=>{$("cashReceived").value=btn.dataset.cash==="exact"?cartTotal():Number(btn.dataset.cash);updateCash()}));
 $("cashReceived").addEventListener("input",updateCash);$("method").onchange=()=>{resetRequest();updateCash()};$("branch").onchange=()=>{resetRequest();loadSales().catch(e=>message(e.message,true))};
