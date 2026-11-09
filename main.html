@@ -354,6 +354,10 @@ body.dark-mode #transactionArea .cashier-awareness-item strong{color:#f8fafc}
 #cashierCheckout .quick-qty button{display:grid;place-items:center;min-width:32px;width:32px;height:34px;padding:0;border-radius:8px;font-size:20px;font-weight:800;background:#fff;color:#c91424;border:1px solid #e2e8f0;box-shadow:none}
 #cashierCheckout .quick-qty button:disabled{opacity:.4}
 #cashierCheckout .quick-qty span{min-width:22px;text-align:center;font-size:14px;font-weight:800}
+#cashierCheckout .quick-qty input[data-qty]{width:58px;min-width:0;height:34px;padding:3px 4px;text-align:center;font-size:15px;font-weight:800;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#111827;appearance:textfield;-moz-appearance:textfield}
+#cashierCheckout .quick-qty input[data-qty]::-webkit-inner-spin-button,#cashierCheckout .quick-qty input[data-qty]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+#cashierCheckout #method{min-height:46px;border:1px solid #cbd5e1;border-radius:10px;padding:9px 12px;font-size:16px;font-weight:700;background:#fff;color:#111827}
+body.dark-mode #cashierCheckout .quick-qty input[data-qty],body.dark-mode #cashierCheckout #method{background:#263244;color:#fff;border-color:#475569}
 #cashierCheckout #cart table{width:100%}
 #cashierCheckout #cart td{vertical-align:middle}
 #transactionArea #products .product{cursor:pointer}
@@ -367,16 +371,33 @@ body.dark-mode #transactionArea .cashier-awareness-item strong{color:#f8fafc}
  #transactionArea .product-info{padding:8px}
  #transactionArea .product-info b{font-size:12px}
  #transactionArea .menu-photo-note{font-size:10px}
- #cashierCheckout #cart td:nth-child(2){width:115px}
+ #cashierCheckout #cart td:nth-child(2){width:155px}
  #cashierCheckout #cart td:last-child{width:88px;font-size:12px;text-align:right}
  #cashierCheckout .quick-qty{gap:2px;padding:2px}
  #cashierCheckout .quick-qty button{width:29px;min-width:29px;height:32px}
- #cashierCheckout .quick-qty span{min-width:20px}
+ #cashierCheckout .quick-qty input[data-qty]{width:49px}
  .mobile-cart-bar button{background:#c91424;color:white;font-weight:800;border-radius:11px}
 }
 body.dark-mode #cashierCheckout .quick-qty{background:#263244;border-color:#475569}
 body.dark-mode #cashierCheckout .quick-qty button{background:#364152;border-color:#475569;color:#fda4af}
 
+
+/* Pilihan pembayaran kiri-kanan, bukan dropdown */
+.payment-method-label{display:block;margin-bottom:9px;font-size:14px}
+.payment-method-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.payment-method-buttons .payment-choice{width:100%;min-height:48px;background:#f7f8fa;color:#344054;border:1.5px solid #e0e4ea;border-radius:12px;font-weight:750;box-shadow:none}
+.payment-method-buttons .payment-choice.selected{background:#fff0f2;color:#c90c29;border-color:#e50928;box-shadow:inset 0 0 0 1px #e50928}
+.payment-method-buttons .payment-choice:focus-visible{outline:3px solid #fda4af;outline-offset:2px}
+.payment-method-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
+body.dark-mode .payment-method-buttons .payment-choice{background:#293241;color:#e5e7eb;border-color:#475569}
+body.dark-mode .payment-method-buttons .payment-choice.selected{background:#4c1e2c;color:#fff;border-color:#fb7185}
+
+/* Hapus satu baris pesanan, termasuk jika jumlahnya 1 */
+#cashierCheckout .cart-row-total{display:flex;flex-direction:column;align-items:flex-end;gap:5px;white-space:nowrap}
+#cashierCheckout .cart-delete{font-size:11px;font-weight:700;border:1px solid #fecaca;border-radius:7px;background:#fff1f2;color:#b91c1c;padding:5px 8px;cursor:pointer;box-shadow:none}
+#cashierCheckout .cart-delete:hover{background:#ffe4e6}
+#cashierCheckout .cart-delete:disabled{opacity:.45;cursor:not-allowed}
+body.dark-mode #cashierCheckout .cart-delete{background:#44242b;color:#fda4af;border-color:#7f1d1d}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -414,7 +435,7 @@ body.dark-mode #cashierCheckout .quick-qty button{background:#364152;border-colo
 <section class="cashier-awareness" id="cashierAwareness" aria-label="Ringkasan transaksi kasir hari ini">
 <div class="cashier-summary-head"><h3>📊 Ringkasan Kasir</h3><span>Hari ini · WIB</span></div><p id="cashierAwarenessScope">Transaksi selesai hari ini (WIB), hanya penjualan akun Kasir ini. Transaksi offline tertunda belum dihitung.</p>
 <div class="cashier-awareness-grid"><div class="cashier-awareness-item"><small>💰 Omzet Kasir</small><strong id="cashierTodayRevenue">—</strong></div><div class="cashier-awareness-item"><small>🍗 Ayam Terjual</small><strong id="cashierTodayQty">—</strong></div></div><details class="cashier-payment-details"><summary>Rincian pembayaran</summary><div class="cashier-payment-grid"><div><small>Tunai</small><strong id="cashierTodayCash">—</strong></div><div><small>QRIS</small><strong id="cashierTodayQris">—</strong></div></div></details></section>
-<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>🛒 Keranjang Pesanan</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><label>Metode pembayaran <select id="method"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
+<div class="grid"><section class="menu-section"><div class="menu-banner"><div class="menu-icon">🍴</div><div><h2>Pilih Menu</h2><p>Klik menu untuk menambahkan pesanan</p></div></div><div id="products" class="products"></div><p class="muted small menu-photo-note">Foto merupakan ilustrasi kategori menu.</p></section><section class="panel" id="cashierCheckout" tabindex="-1"><h2>🛒 Keranjang Pesanan</h2><div id="cart"></div><p class="flex" style="justify-content:space-between"><b>Total</b><span class="total" id="total">Rp 0</span></p><div class="payment-method-field"><strong class="payment-method-label">Metode pembayaran</strong><div class="payment-method-buttons" role="group" aria-label="Metode pembayaran"><button type="button" class="payment-choice selected" data-payment="tunai" aria-pressed="true">💵 Tunai</button><button type="button" class="payment-choice" data-payment="non_tunai" aria-pressed="false">📱 QRIS</button></div><select id="method" aria-label="Pilih metode pembayaran" class="payment-method-native" tabindex="-1"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></div><div id="cashBox" style="margin-top:16px;padding:14px;background:#f7f8fa;border-radius:12px">
 <div class="cash-quick"><button type="button" data-cash="exact">Uang Pas</button><button type="button" data-cash="30000">30.000</button><button type="button" data-cash="50000">50.000</button><button type="button" data-cash="100000">100.000</button></div><label>Uang diterima (Rp) <input id="cashReceived" type="number" min="0" step="100" inputmode="numeric" placeholder="Contoh: 20000" style="width:100%;margin-top:7px"></label>
 <p class="flex" style="justify-content:space-between"><b>Kembalian</b><strong id="changeDue" class="total">Rp 0</strong></p>
 <p id="cashWarning" class="error small"></p></div>
@@ -864,7 +885,7 @@ $('mobileCheckout').onclick=()=>{
 };
 function renderCart(){
  let sum=0;let rows="";
- for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><div class="quick-qty"><button type="button" data-qty-step="-1" data-id="${escapeHTML(id)}" aria-label="Kurangi ${escapeHTML(p.name)}" ${busy?"disabled":""}>−</button><span aria-label="Jumlah ${qty}">${qty}</span><button type="button" data-qty-step="1" data-id="${escapeHTML(id)}" aria-label="Tambah ${escapeHTML(p.name)}" ${busy||qty>=999?"disabled":""}>+</button></div></td><td>${rupiah(Number(p.price)*qty)}</td></tr>`}
+ for(const [id,qty] of cart){const p=products.find(x=>x.id===id);if(!p)continue;sum+=Number(p.price)*qty;rows+=`<tr><td>${escapeHTML(p.name)}<div class="muted small">${rupiah(p.price)}</div></td><td><div class="quick-qty"><button type="button" data-qty-step="-1" data-id="${escapeHTML(id)}" aria-label="Kurangi ${escapeHTML(p.name)}" ${busy?"disabled":""}>−</button><input type="number" data-qty="${escapeHTML(id)}" aria-label="Edit jumlah ${escapeHTML(p.name)}" min="0" max="999" step="1" inputmode="numeric" value="${qty}" ${busy?"disabled":""} title="Ketik jumlah langsung, misalnya 100"><button type="button" data-qty-step="1" data-id="${escapeHTML(id)}" aria-label="Tambah ${escapeHTML(p.name)}" ${busy||qty>=999?"disabled":""}>+</button></div></td><td><div class="cart-row-total">${rupiah(Number(p.price)*qty)}<button type="button" class="cart-delete" data-cart-delete="${escapeHTML(id)}" aria-label="Hapus ${escapeHTML(p.name)} dari keranjang" title="Hapus pesanan" ${busy?"disabled":""}>🗑 Hapus</button></div></td></tr>`}
  $("cart").innerHTML=rows?`<table><tbody>${rows}</tbody></table>`:"<p class='muted'>Belum ada produk dipilih.</p>";
  $("total").textContent=rupiah(sum);
  $('mobileCartCount').textContent=[...cart.values()].reduce((n,qty)=>n+qty,0)+' item';
@@ -1010,10 +1031,14 @@ $("headerReload").onclick=async()=>{
 $("headerLogout").onclick=()=>$("logout").click();
 $("themeToggle").onclick=()=>{const dark=document.body.classList.toggle("dark-mode");$("themeToggle").textContent=dark?"☀":"☾";$("themeToggle").title=dark?"Mode terang":"Mode malam";$("themeToggle").setAttribute("aria-label",dark?"Mode terang":"Mode malam");};
 $("products").addEventListener("click",e=>{const btn=e.target.closest("[data-product]");if(!btn||busy)return;const id=btn.dataset.product;const qty=cart.get(id)||0;if(qty>=999)return;cart.set(id,qty+1);resetRequest();renderCart()});
+$("cart").addEventListener("click",e=>{const btn=e.target.closest("[data-cart-delete]");if(!btn||busy)return;cart.delete(btn.dataset.cartDelete);resetRequest();renderCart()});
 $("cart").addEventListener("click",e=>{const btn=e.target.closest("[data-qty-step]");if(!btn||busy)return;const id=btn.dataset.id,step=Number(btn.dataset.qtyStep),next=(cart.get(id)||0)+step;if(!Number.isInteger(next)||next<0||next>999)return;if(next===0)cart.delete(id);else cart.set(id,next);resetRequest();renderCart()});
 $("cart").addEventListener("change",e=>{if(!e.target.matches("[data-qty]")||busy)return;const id=e.target.dataset.qty,qty=Number(e.target.value);if(!Number.isInteger(qty)||qty<0||qty>999){renderCart();return}if(qty===0)cart.delete(id);else cart.set(id,qty);resetRequest();renderCart()});
+$("cart").addEventListener("keydown",e=>{if(e.target.matches("[data-qty]")&&e.key==="Enter"){e.preventDefault();e.target.blur()}});
 document.querySelectorAll("[data-cash]").forEach(btn=>btn.addEventListener("click",()=>{$("cashReceived").value=btn.dataset.cash==="exact"?cartTotal():Number(btn.dataset.cash);updateCash()}));
-$("cashReceived").addEventListener("input",updateCash);$("method").onchange=()=>{resetRequest();updateCash()};$("branch").onchange=()=>{resetRequest();loadSales().catch(e=>message(e.message,true))};
+function syncPaymentChoices(){document.querySelectorAll('.payment-choice').forEach(btn=>{const active=btn.dataset.payment===$("method").value;btn.classList.toggle('selected',active);btn.setAttribute('aria-pressed',String(active))})}
+ document.querySelectorAll('.payment-choice').forEach(btn=>btn.addEventListener('click',()=>{if($("method").value===btn.dataset.payment)return;$("method").value=btn.dataset.payment;$("method").dispatchEvent(new Event('change',{bubbles:true}))}));
+ $("cashReceived").addEventListener("input",updateCash);$("method").onchange=()=>{syncPaymentChoices();resetRequest();updateCash()};syncPaymentChoices();$("branch").onchange=()=>{resetRequest();loadSales().catch(e=>message(e.message,true))};
 function showSaleSuccess(record){
  $('saleSuccessTotal').textContent='Total: '+rupiah(record.total)+' · '+(record.payment_method==='tunai'?'Tunai':'QRIS');
  $('saleSuccessStatus').textContent='Transaksi tersimpan di perangkat. '+(navigator.onLine?'Sedang menunggu sinkronisasi ke server.':'Akan disinkronkan otomatis saat internet tersedia.');
