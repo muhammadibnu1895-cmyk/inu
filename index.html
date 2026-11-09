@@ -1074,7 +1074,7 @@ $("salaryRateSave").addEventListener("click",async()=>{
  if(!id||!Number.isSafeInteger(amount)||amount<1){salaryStatus("salaryRateStatus","Tarif tidak valid",true);return;}
  if(!confirm("Ubah tarif harian Kasir terpilih menjadi "+rupiah(amount)+"?"))return;
  $("salaryRateSave").disabled=true;
- try{await check(await sb.rpc("owner_set_cashier_daily_rate",{p_cashier_id:id,p_daily_rate:amount}));salaryStatus("salaryRateStatus","Tarif berhasil diperbarui");await loadSalaryRate();scheduleSalaryAutoPreview();}
+ try{await check(await sb.rpc("owner_set_cashier_daily_rate",{p_cashier_id:id,p_daily_rate:amount}));invalidateSalaryPreview();salaryStatus("salaryRateStatus","Tarif berhasil diperbarui. Hitung ulang preview sebelum membayar.");await loadSalaryRate();scheduleSalaryAutoPreview();}
  catch(e){salaryStatus("salaryRateStatus","Gagal menyimpan tarif: "+e.message,true);$("salaryRateSave").disabled=false;}
 });
 function scheduleSalaryAutoPreview(){
@@ -1197,11 +1197,12 @@ $("salaryPreviewBtn").addEventListener("click",async()=>{
 $("salaryForm").addEventListener("submit",async e=>{
  e.preventDefault();if(profile?.role!=="owner"||!salaryPreviewSnapshot)return;
  const x=salaryPreviewSnapshot,btn=$("salaryPayBtn");
+ if(x.id!==salaryCashierId()||x.start!==$("salaryStart").value||x.end!==$("salaryEnd").value||x.deduction!==Number($("salaryDeduction").value)){invalidateSalaryPreview();salaryStatus("salaryPayStatus","Data berubah. Hitung ulang preview sebelum membayar.",true);return;}
  if(!confirm(`Pastikan uang gaji bersih ${rupiah(x.net)} untuk ${x.days} hari sudah diserahkan. Catat sebagai LUNAS?`))return;
  btn.disabled=true;
  try{
   const paymentId=await check(await sb.rpc("owner_pay_cashier_salary",{p_cashier_id:x.id,p_period_start:x.start,p_period_end:x.end,p_cash_advance_deduction:x.deduction}));
-  invalidateSalaryPreview();salaryStatus("salaryPayStatus","Pembayaran gaji berhasil dicatat. ID: "+paymentId);await refreshSalaryBalance();
+  invalidateSalaryPreview();salaryStatus("salaryPayStatus","Pembayaran gaji berhasil dicatat. ID: "+paymentId);await refreshSalaryBalance();scheduleSalaryAutoPreview();await loadAdvanceHistory();
  }catch(err){invalidateSalaryPreview();salaryStatus("salaryPayStatus","Pembayaran belum dapat dikonfirmasi: "+err.message+". Periksa riwayat sebelum mencoba lagi.",true)}
 });
 
