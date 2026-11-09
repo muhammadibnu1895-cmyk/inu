@@ -272,6 +272,9 @@ body.dark-mode .cashier-awareness-item{background:#3d2630;border-color:#65414c}
 .stock-form{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.stock-form label{flex:1;min-width:120px}.stock-form input,.stock-form select{width:100%}
 body.dark-mode .stock-panel{background:#1f2937;border-color:#475569}body.dark-mode .stock-cell{background:#3d2630}
 @media(max-width:520px){.stock-grid{gap:6px}.stock-cell{padding:8px}.stock-cell strong{font-size:18px}}
+
+/* Koreksi absensi Owner */
+.attendance-row-actions{display:flex;justify-content:flex-end;gap:6px;white-space:nowrap}.attendance-row-actions button{padding:7px 10px;font-size:12px}.attendance-row-actions .danger{background:#b91c1c}.attendance-dialog{border:0;border-radius:17px;padding:24px;width:min(460px,calc(100vw - 28px));max-height:90dvh;overflow:auto;box-shadow:0 20px 70px #0004}.attendance-dialog::backdrop{background:#0f172a99}.attendance-dialog form{display:grid;gap:12px}.attendance-dialog label{display:grid;gap:5px;font-size:13px;font-weight:650}.attendance-dialog input{width:100%}body.dark-mode .attendance-dialog{background:#1f2937;color:#f8fafc}
 </style></head>
 <body><div id="inuToast" role="status" aria-live="polite"><span id="inuToastText"></span><button type="button" aria-label="Tutup notifikasi" onclick="document.getElementById('inuToast').classList.remove('show')">×</button></div>
 <dialog id="moreMenu" aria-labelledby="moreTitle"><h2 id="moreTitle">Menu Owner</h2><div id="moreMenuItems"></div><form method="dialog"><button class="secondary">Tutup</button></form></dialog>
@@ -316,7 +319,8 @@ body.dark-mode .stock-panel{background:#1f2937;border-color:#475569}body.dark-mo
 <p><button id="pay" style="width:100%">Simpan Transaksi</button></p><p class="muted small">Transaksi disimpan dahulu di perangkat, lalu disinkronkan. Jangan hapus data browser sebelum antrean kosong.</p></section></div>
 <div class="mobile-cart-bar" aria-label="Ringkasan keranjang"><div aria-live="polite"><small id="mobileCartCount">0 item</small><strong id="mobileCartTotal">Rp 0</strong></div><button type="button" id="mobileCheckout" disabled>Bayar ↓</button></div>
 </div><section class="panel" id="recentPanel" hidden><h2>Penjualan Terakhir</h2><p id="salesReadStatus" class="muted small" role="status">Menunggu data penjualan...</p><button type="button" id="salesRefresh" class="secondary" style="margin-bottom:12px">↻ Muat Penjualan</button><div style="overflow-x:auto"><table><thead><tr><th>Waktu</th><th>Cabang</th><th>Metode</th><th>Status</th><th>Total</th><th>Detail Produk</th><th id="salesActionHeading">Aksi Owner</th></tr></thead><tbody id="sales"></tbody></table></div><div id="saleEditor" class="panel" hidden style="margin-top:15px;border:2px solid #fed7aa"><h3>✏️ Edit Transaksi</h3><p id="saleEditInfo" class="muted mini"></p><form id="saleEditForm"><label>Metode pembayaran <select id="saleEditMethod"><option value="tunai">Tunai</option><option value="non_tunai">QRIS</option></select></label><div id="saleEditItems" style="margin:12px 0"></div><button type="button" class="secondary" id="saleAddItem">+ Tambah Produk</button><p><strong id="saleEditTotal">Total: Rp0</strong></p><label>Alasan perubahan <input id="saleEditReason" maxlength="250" required style="width:100%" placeholder="Contoh: koreksi jumlah pesanan"></label><p class="flex"><button type="submit" id="saleEditSave">Simpan Perubahan</button><button type="button" class="secondary" id="saleEditCancel">Batal</button></p></form><p id="saleEditStatus" role="status"></p></div></section>
-<section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang saat Keluar atau pergantian hari pukul 00.00 WIB. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
+<section id="attendancePanel" class="panel" hidden><h2>Riwayat Absensi Kasir (Owner)</h2><p class="muted mini">Masuk otomatis saat Kasir login; pulang saat Keluar atau pergantian hari pukul 00.00 WIB. Waktu dicatat oleh server.</p><div id="attendanceActions" class="flex" hidden><button id="clockIn" type="button" hidden>Absen Masuk</button><button id="clockOut" type="button" class="secondary" hidden>Absen Pulang</button></div><p id="attendanceStatus" role="status"></p><h3>Riwayat Absensi 30 Hari</h3><div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Kasir</th><th>Cabang</th><th>Masuk</th><th>Pulang</th><th>Aksi Owner</th></tr></thead><tbody id="attendanceRows"></tbody></table></div><button id="attendanceRefresh" class="secondary" type="button">Muat Ulang Absensi</button></section>
+<dialog id="attendanceEditDialog" class="attendance-dialog"><form id="attendanceEditForm"><h3>Edit Absensi Kasir</h3><p id="attendanceEditWho" class="muted mini"></p><label>Tanggal kerja<input id="attendanceEditDate" type="date" required></label><label>Jam masuk (WIB)<input id="attendanceEditIn" type="datetime-local" required></label><label>Jam pulang (WIB, opsional)<input id="attendanceEditOut" type="datetime-local"></label><label>Alasan perubahan<input id="attendanceEditReason" minlength="5" maxlength="300" required placeholder="Minimal 5 karakter"></label><p id="attendanceEditError" class="error mini" role="alert"></p><div class="flex"><button type="button" class="secondary" id="attendanceEditCancel">Batal</button><button type="submit" id="attendanceEditSave">Simpan Perubahan</button></div></form></dialog>
 <section id="exportPanel" class="panel" hidden><h2>💾 Export &amp; Import Excel</h2><h3>Ekspor Data</h3><p class="muted">Unduh satu file Excel dengan 6 sheet: Ringkasan, Penjualan, Detail Produk, Absensi, Gaji, dan Kasbon. Khusus Owner.</p>
 <form id="excelExportForm" class="admin-grid"><label>Periode<select id="excelPeriod"><option value="today">Hari Ini</option><option value="seven">7 Hari Terakhir</option><option value="month">Bulan Ini</option><option value="custom">Tanggal Bebas</option></select></label><label>Cabang<select id="excelBranch"><option value="">Semua Cabang</option></select></label><label>Tanggal mulai<input type="date" id="excelStart" required></label><label>Tanggal akhir<input type="date" id="excelEnd" required></label><div><button type="submit" id="excelDownload">⬇ Unduh Excel (.xlsx)</button></div></form><p id="excelStatus" role="status" aria-live="polite"></p><p class="muted small">Tanggal memakai WIB. Gaji dan kasbon difilter berdasarkan tanggal pencatatan/pembayaran. Cabang gaji dan kasbon mengikuti penempatan Kasir saat ini, bukan riwayat perpindahan cabang. Ekspor bukan backup database.</p></section>
 <section id="salaryPanel" class="panel" hidden>
@@ -1031,13 +1035,63 @@ $("retryAttendance").onclick=async()=>{
  const btn=$("retryAttendance");btn.disabled=true;
  try{await autoClockInAfterLogin();}finally{btn.disabled=false;}
 };
+// Aksi koreksi absensi hanya untuk Owner; otorisasi wajib ditegakkan ulang oleh RPC server.
+let attendanceOwnerRows=[];
+let attendanceEditId=null;
+const attendanceWibInput=x=>x?new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Jakarta',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(x)).replace(' ','T'):'';
+const attendanceWibIso=x=>x?new Date(x+':00+07:00').toISOString():null;
+function attendanceOwnerFind(id){return attendanceOwnerRows.find(a=>a.id===id);}
+function attendanceOpenEdit(id){
+ if(profile?.role!=='owner')return;
+ const a=attendanceOwnerFind(id);if(!a)return;
+ attendanceEditId=id;
+ $('attendanceEditWho').textContent=(a.cashier_name||'Kasir')+' · '+(a.branch_name||'Cabang');
+ $('attendanceEditDate').value=a.work_date;
+ $('attendanceEditIn').value=attendanceWibInput(a.checked_in_at);
+ $('attendanceEditOut').value=attendanceWibInput(a.checked_out_at);
+ $('attendanceEditReason').value='';$('attendanceEditError').textContent='';
+ $('attendanceEditDialog').showModal();
+}
+$('attendanceEditCancel').onclick=()=>$('attendanceEditDialog').close();
+$('attendanceRows').addEventListener('click',async e=>{
+ const edit=e.target.closest('[data-att-edit]');const del=e.target.closest('[data-att-delete]');
+ if(profile?.role!=='owner')return;
+ if(edit){attendanceOpenEdit(edit.dataset.attEdit);return;}
+ if(!del)return;
+ const a=attendanceOwnerFind(del.dataset.attDelete);if(!a)return;
+ if(!confirm('Batalkan absensi '+(a.cashier_name||'Kasir')+' tanggal '+a.work_date+'? Data akan disimpan sebagai arsip.'))return;
+ const reason=prompt('Alasan hapus absensi (minimal 5 karakter):');
+ if(reason===null)return;
+ if(reason.trim().length<5){alert('Alasan minimal 5 karakter.');return;}
+ del.disabled=true;
+ try{
+  await check(await sb.rpc('owner_delete_attendance',{p_attendance_id:a.id,p_reason:reason.trim()}));
+  invalidateSalaryPreview();await loadAttendance();message('Absensi berhasil dibatalkan.');
+ }catch(err){alert('Gagal menghapus absensi: '+err.message);}
+ finally{del.disabled=false;}
+});
+$('attendanceEditForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(profile?.role!=='owner'||!attendanceEditId)return;
+ const btn=$('attendanceEditSave');const reason=$('attendanceEditReason').value.trim();
+ const date=$('attendanceEditDate').value,inside=$('attendanceEditIn').value,outside=$('attendanceEditOut').value;
+ if(reason.length<5){$('attendanceEditError').textContent='Alasan minimal 5 karakter.';return;}
+ if(!inside.startsWith(date+'T')){$('attendanceEditError').textContent='Tanggal jam masuk harus sama dengan tanggal kerja.';return;}
+ if(outside&&outside<=inside){$('attendanceEditError').textContent='Jam pulang harus setelah jam masuk.';return;}
+ btn.disabled=true;$('attendanceEditError').textContent='';
+ try{
+  await check(await sb.rpc('owner_update_attendance',{p_attendance_id:attendanceEditId,p_work_date:date,p_checked_in_at:attendanceWibIso(inside),p_checked_out_at:attendanceWibIso(outside),p_reason:reason}));
+  $('attendanceEditDialog').close();invalidateSalaryPreview();await loadAttendance();message('Absensi berhasil diperbarui.');
+ }catch(err){$('attendanceEditError').textContent='Gagal menyimpan: '+err.message;}
+ finally{btn.disabled=false;}
+});
 // ABSENSI: owner melihat semua, kasir hanya diri sendiri (dibatasi di RPC server)
 const attendanceTime=x=>x?new Date(x).toLocaleTimeString('id-ID',{timeZone:'Asia/Jakarta',hour:'2-digit',minute:'2-digit',hour12:false}):'—';
 async function loadAttendance(){
  if(!profile||profile.role!=="owner")return;
  try{
   const rows=await check(await sb.rpc('attendance_history',{p_days:30}));
-  $("attendanceRows").innerHTML=rows.length?rows.map(a=>`<tr><td>${escapeHTML(a.work_date)}</td><td>${escapeHTML(a.cashier_name||'—')}</td><td>${escapeHTML(a.branch_name||'—')}</td><td>${attendanceTime(a.checked_in_at)}</td><td>${attendanceTime(a.checked_out_at)}</td></tr>`).join(''):'<tr><td colspan="5">Belum ada absensi</td></tr>';
+  attendanceOwnerRows=rows;
+  $("attendanceRows").innerHTML=rows.length?rows.map(a=>`<tr><td>${escapeHTML(a.work_date)}</td><td>${escapeHTML(a.cashier_name||'—')}</td><td>${escapeHTML(a.branch_name||'—')}</td><td>${attendanceTime(a.checked_in_at)}</td><td>${attendanceTime(a.checked_out_at)}</td><td><div class="attendance-row-actions"><button type="button" class="secondary" data-att-edit="${escapeHTML(a.id)}">Edit</button><button type="button" class="danger" data-att-delete="${escapeHTML(a.id)}">Hapus</button></div></td></tr>`).join(''):'<tr><td colspan="6">Belum ada absensi</td></tr>';
   $("attendanceStatus").textContent='Riwayat seluruh kasir.';
  }catch(e){$("attendanceStatus").textContent='Gagal memuat absensi: '+e.message;$("attendanceRows").innerHTML='';}
 }
