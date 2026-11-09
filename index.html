@@ -1074,7 +1074,7 @@ $("salaryRateSave").addEventListener("click",async()=>{
  if(!id||!Number.isSafeInteger(amount)||amount<1){salaryStatus("salaryRateStatus","Tarif tidak valid",true);return;}
  if(!confirm("Ubah tarif harian Kasir terpilih menjadi "+rupiah(amount)+"?"))return;
  $("salaryRateSave").disabled=true;
- try{await check(await sb.rpc("owner_set_cashier_daily_rate",{p_cashier_id:id,p_daily_rate:amount}));invalidateSalaryPreview();salaryStatus("salaryRateStatus","Tarif berhasil diperbarui. Hitung ulang preview sebelum membayar.");await loadSalaryRate();scheduleSalaryAutoPreview();}
+ try{await check(await sb.rpc("owner_set_cashier_daily_rate",{p_cashier_id:id,p_daily_rate:amount}));invalidateSalaryPreview();salaryStatus("salaryRateStatus","Tarif berhasil diperbarui. Perubahan berikutnya tetap diperbolehkan; preview pembayaran lama dibatalkan.");await loadSalaryRate();scheduleSalaryAutoPreview();}
  catch(e){salaryStatus("salaryRateStatus","Gagal menyimpan tarif: "+e.message,true);$("salaryRateSave").disabled=false;}
 });
 function scheduleSalaryAutoPreview(){
@@ -1115,6 +1115,7 @@ async function loadSalaryScreen(){
   const cashiers=await check(await sb.from("profiles").select("id,display_name,active").eq("role","kasir").order("display_name"));
   $("salaryCashier").innerHTML='<option value="">Pilih Kasir</option>'+cashiers.map(c=>`<option value="${escapeHTML(c.id)}">${escapeHTML(c.display_name||c.id)}${c.active?"":" (nonaktif)"}</option>`).join("");
   if(cashiers.some(c=>c.id===old))$("salaryCashier").value=old;
+  else if(cashiers.length)$("salaryCashier").value=cashiers[0].id;
   await refreshSalaryBalance();await loadSalaryRate();scheduleSalaryAutoPreview();await loadAdvanceHistory();
  }catch(e){salaryStatus("salaryBalanceStatus","Gagal memuat Kasir: "+e.message,true)}
 }
@@ -1133,17 +1134,17 @@ $("salaryCashier").addEventListener("change",async()=>{await refreshSalaryBalanc
 for(const id of ["salaryStart","salaryEnd","salaryDeduction"])$(id).addEventListener("input",()=>{invalidateSalaryPreview();if(id!=="salaryDeduction")scheduleSalaryAutoPreview();});
 // Edit/hapus kasbon: semua operasi diproses dan diaudit oleh RPC Owner-only.
 async function loadAdvanceHistory(){
- const target=$("advanceHistory"),id=salaryCashierId();target.textContent="";
- if(profile?.role!=="owner"||!id){salaryStatus("advanceHistoryStatus","Pilih Kasir untuk melihat riwayat.");return;}
+ const target=$("advanceHistory"),id=salaryCashierId();target.textContent="Memuat riwayat kasbon...";
+ if(profile?.role!=="owner"||!id){target.textContent="Pilih kasir terlebih dahulu.";salaryStatus("advanceHistoryStatus","Pilih Kasir untuk melihat riwayat.");return;}
  try{
   const data=await check(await sb.rpc("owner_list_cash_advances",{p_cashier_id:id}));
-  const rows=Array.isArray(data)?data:[];
-  if(!rows.length){target.textContent="Belum ada kasbon untuk Kasir ini.";salaryStatus("advanceHistoryStatus","0 transaksi.");return;}
+  const rows=Array.isArray(data)?data:(data==null?[]:(Array.isArray(data.rows)?data.rows:(Array.isArray(data.data)?data.data:[data])));
+  if(!rows.length){target.textContent="Tidak ada riwayat kasbon yang dikembalikan server untuk kasir ini.";salaryStatus("advanceHistoryStatus","0 transaksi.");return;}
   const table=document.createElement("table");table.innerHTML="<thead><tr><th>Tanggal</th><th>Nominal</th><th>Keterangan</th><th>Aksi</th></tr></thead>";
   const tbody=document.createElement("tbody");
   rows.forEach(x=>{
    const tr=document.createElement("tr"),date=document.createElement("td"),amount=document.createElement("td"),note=document.createElement("td"),actions=document.createElement("td");
-   date.textContent=new Date(x.created_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"});amount.textContent=rupiah(x.amount);note.textContent=x.note||"—";
+   date.textContent=x.created_at?new Date(x.created_at).toLocaleString("id-ID",{timeZone:"Asia/Jakarta"}):"—";amount.textContent=rupiah(x.amount??0);note.textContent=x.note||"—";
    const edit=document.createElement("button");edit.type="button";edit.className="secondary";edit.textContent="Edit";
    edit.addEventListener("click",async()=>{
     const a=prompt("Nominal kasbon baru (Rp)",String(x.amount));if(a===null)return;
@@ -1165,7 +1166,7 @@ async function loadAdvanceHistory(){
    });
    actions.append(edit," ",del);tr.append(date,amount,note,actions);tbody.append(tr);
   });table.append(tbody);target.append(table);salaryStatus("advanceHistoryStatus",rows.length+" transaksi kasbon.");
- }catch(e){salaryStatus("advanceHistoryStatus","Riwayat belum tersedia: "+e.message+". Jalankan SQL pendamping terlebih dahulu.",true)}
+ }catch(e){salaryStatus("advanceHistoryStatus","Gagal mengambil riwayat dari Supabase: "+e.message,true)}
 }
 $("advanceRefresh").addEventListener("click",loadAdvanceHistory);
 $("advanceForm").addEventListener("submit",async e=>{
