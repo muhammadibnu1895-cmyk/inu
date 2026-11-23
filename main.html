@@ -491,7 +491,14 @@ body.dark-mode #cashierCheckout .cart-delete{background:#44242b;color:#fda4af;bo
  </form>
  <p id="purchaseStatus" class="muted mini" role="status" aria-live="polite">Data pembelian akan disimpan ke database.</p>
  <h3>Riwayat Pembelian</h3>
- <p class="muted mini">Menampilkan maksimal 200 pembelian terbaru.</p>
+ <p class="muted mini">Menampilkan maksimal 200 pembelian terbaru. Ekspor CSV mengambil hingga 5.000 data sesuai filter cabang.</p>
+ <div class="flex" style="flex-wrap:wrap;gap:8px;margin:10px 0">
+  <button type="button" id="purchaseCsvExport" class="secondary">⬇ Export CSV</button>
+  <button type="button" id="purchaseCsvTemplate" class="secondary">📄 Unduh Template CSV</button>
+  <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--border,#ddd);border-radius:10px;cursor:pointer">⬆ Pilih CSV untuk Import<input type="file" id="purchaseCsvFile" accept=".csv,text/csv" style="display:none"></label>
+  <button type="button" id="purchaseCsvImport" disabled>Import CSV</button>
+ </div>
+ <p id="purchaseCsvStatus" class="muted mini" role="status" aria-live="polite">Format kolom: tanggal,cabang,bahan,qty,satuan,harga_satuan,supplier,catatan. Cabang harus sesuai nama cabang di aplikasi.</p>
  <div style="overflow-x:auto"><table><thead><tr><th>Tanggal</th><th>Cabang</th><th>Bahan</th><th>Qty</th><th>Harga / Satuan</th><th>Total</th><th>Catatan</th></tr></thead><tbody id="purchaseRows"><tr><td colspan="7">Memuat riwayat...</td></tr></tbody></table></div>
 </section>
 
@@ -664,6 +671,77 @@ async function loadPurchaseHistory(){
   purchaseSetStatus('Gagal mengambil data: '+err.message,true);
  }
 }
+// CSV untuk pembelian bahan baku (khusus Owner).
+let purchaseCsvPending=[];
+function purchaseCsvStatus(message,bad=false){const el=$('purchaseCsvStatus');el.textContent=message;el.className=bad?'error mini':'muted mini';}
+function csvCell(value){let v=String(value??'');if(/^[=+@\-]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"';}
+function downloadPurchaseCsv(rows,filename){
+ const headers=['tanggal','cabang','bahan','qty','satuan','harga_satuan','supplier','catatan'];
+ const csv='\uFEFF'+[headers,...rows.map(r=>headers.map(h=>r[h]??''))].map(row=>row.map(csvCell).join(',')).join('\r\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
+}
+function parsePurchaseCsv(text){
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i];
+  if(quoted){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}
+  else if(c==='"')quoted=true;
+  else if(c===','){row.push(field);field='';}
+  else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+  else if(c!=='\r')field+=c;
+ }
+ if(quoted)throw new Error('CSV memiliki tanda kutip yang tidak berpasangan.');
+ if(field.length||row.length){row.push(field);rows.push(row);}
+ return rows.filter(r=>r.some(v=>String(v).trim()!==''));
+}
+$('purchaseCsvTemplate').addEventListener('click',()=>downloadPurchaseCsv([{tanggal:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'}),cabang:branches[0]?.name||'Nama Cabang',bahan:'Ayam',qty:'10',satuan:'kg',harga_satuan:'35000',supplier:'Supplier Contoh',catatan:'Contoh pembelian'}],'template_pembelian_bahan.csv'));
+$('purchaseCsvExport').addEventListener('click',async()=>{
+ if(profile?.role!=='owner')return;
+ const btn=$('purchaseCsvExport');btn.disabled=true;
+ try{
+  let q=sb.from('ingredient_purchases').select('branch_id,purchase_date,item_name,qty,unit,unit_price,supplier,note').order('purchase_date',{ascending:false}).limit(5000);
+  const branch=$('purchaseBranch').value;if(branch)q=q.eq('branch_id',branch);
+  const rows=await check(await q);
+  const output=rows.map(r=>({tanggal:r.purchase_date,cabang:branches.find(b=>b.id===r.branch_id)?.name||r.branch_id,bahan:r.item_name,qty:r.qty,satuan:r.unit,harga_satuan:r.unit_price,supplier:r.supplier||'',catatan:r.note||''}));
+  downloadPurchaseCsv(output,'pembelian_bahan_'+(branch?'cabang':'semua')+'.csv');
+  purchaseCsvStatus('Berhasil mengekspor '+output.length+' baris pembelian.');
+ }catch(err){purchaseCsvStatus('Export gagal: '+err.message,true);}finally{btn.disabled=false;}
+});
+$('purchaseCsvFile').addEventListener('change',async e=>{
+ purchaseCsvPending=[];$('purchaseCsvImport').disabled=true;
+ const file=e.target.files?.[0];if(!file){purchaseCsvStatus('Belum ada file dipilih.');return;}
+ try{
+  const raw=parsePurchaseCsv((await file.text()).replace(/^\uFEFF/,''));
+  if(raw.length<2)throw new Error('File CSV kosong atau hanya berisi header.');
+  const headers=raw[0].map(x=>String(x).trim().toLowerCase());
+  const required=['tanggal','cabang','bahan','qty','satuan','harga_satuan'];
+  const missing=required.filter(h=>!headers.includes(h));if(missing.length)throw new Error('Kolom wajib tidak ditemukan: '+missing.join(', '));
+  const idx=Object.fromEntries(headers.map((h,i)=>[h,i]));
+  const branchByName=new Map(branches.map(b=>[String(b.name).trim().toLowerCase(),b.id]));
+  const branchById=new Map(branches.map(b=>[String(b.id),b.id]));
+  const converted=raw.slice(1).map((r,i)=>{
+   const get=k=>String(r[idx[k]]??'').trim();
+   const date=get('tanggal'),branchText=get('cabang'),item=get('bahan'),qty=Number(get('qty')),unitPrice=Number(get('harga_satuan'));
+   const branchId=branchById.get(branchText)||branchByName.get(branchText.toLowerCase());
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!branchId||!item||!Number.isFinite(qty)||qty<=0||!Number.isSafeInteger(unitPrice)||unitPrice<0)throw new Error('Data baris '+(i+2)+' tidak valid. Periksa tanggal (YYYY-MM-DD), cabang, bahan, qty, dan harga satuan.');
+   return {branch_id:branchId,purchase_date:date,item_name:item,qty,unit:get('satuan')||'lainnya',unit_price:unitPrice,supplier:get('supplier')||null,note:get('catatan')||null,created_by:user.id};
+  });
+  if(converted.length>1000)throw new Error('Maksimal 1.000 baris per sekali import.');
+  purchaseCsvPending=converted;$('purchaseCsvImport').disabled=false;
+  purchaseCsvStatus('File valid: '+converted.length+' baris siap diimport. Klik Import CSV untuk menyimpan ke database.');
+ }catch(err){purchaseCsvStatus('CSV tidak bisa diproses: '+err.message,true);}
+});
+$('purchaseCsvImport').addEventListener('click',async()=>{
+ if(profile?.role!=='owner'||!purchaseCsvPending.length)return;
+ const btn=$('purchaseCsvImport');btn.disabled=true;
+ try{
+  await check(await sb.from('ingredient_purchases').insert(purchaseCsvPending));
+  purchaseCsvStatus('Berhasil mengimpor '+purchaseCsvPending.length+' baris ke database.');
+  purchaseCsvPending=[];$('purchaseCsvFile').value='';await loadPurchaseHistory();
+ }catch(err){purchaseCsvStatus('Import gagal: '+err.message,true);btn.disabled=false;}
+});
+
 $('purchaseQty').addEventListener('input',purchaseRecalc);
 $('purchaseUnitPrice').addEventListener('input',purchaseRecalc);
 $('purchaseBranch').addEventListener('change',()=>loadPurchaseHistory().catch(console.warn));
