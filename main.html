@@ -405,7 +405,11 @@ body.dark-mode #cashierCheckout .cart-delete{background:#44242b;color:#fda4af;bo
 @media(max-width:420px){.qris-choice-icon{width:21px;height:21px}}
 
 #purchasesPanel .admin-grid{align-items:end}
-#purchasesPanel .stat-card strong{color:#c91424!important}
+/* Kartu total pembelian tidak memakai ikon dekoratif global agar nominal tidak tertutup */
+#purchasesPanel .stat-card{padding:15px!important;min-height:0!important}
+#purchasesPanel .stat-card::before{display:none!important;content:none!important}
+#purchasesPanel .stat-card small{margin-bottom:8px}
+#purchasesPanel .stat-card strong{display:block;padding:0;margin:0;color:#c91424!important;font-size:clamp(22px,5vw,30px)!important;line-height:1.3;overflow-wrap:anywhere}
 #purchasesPanel table{min-width:850px;font-size:13px}
 #purchasesPanel td{vertical-align:top}
 @media(max-width:700px){#purchasesPanel .admin-grid{grid-template-columns:1fr}#purchasesPanel .view-title h2{font-size:21px}}
