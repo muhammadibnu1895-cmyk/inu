@@ -682,18 +682,37 @@ function downloadPurchaseCsv(rows,filename){
  a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
 function parsePurchaseCsv(text){
+ // Mendukung CSV Excel biasa: koma, titik koma (umum pada regional Indonesia), atau tab; tanda kutip opsional.
+ const firstLine=String(text).replace(/^\uFEFF/,'').split(/\r?\n/,1)[0]||'';
+ const counts={',':0,';':0,'\t':0};let inQ=false;
+ for(let i=0;i<firstLine.length;i++){const c=firstLine[i];if(c==='"'&&firstLine[i+1]==='"'){i++;continue;}if(c==='"')inQ=!inQ;else if(!inQ&&Object.prototype.hasOwnProperty.call(counts,c))counts[c]++;}
+ const delimiter=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
  const rows=[];let row=[],field='',quoted=false;
  for(let i=0;i<text.length;i++){
   const c=text[i];
   if(quoted){if(c==='"'&&text[i+1]==='"'){field+='"';i++;}else if(c==='"')quoted=false;else field+=c;}
   else if(c==='"')quoted=true;
-  else if(c===','){row.push(field);field='';}
-  else if(c==='\n'){row.push(field);rows.push(row);row=[];field='';}
+  else if(c===delimiter){row.push(field.trim());field='';}
+  else if(c==='\n'){row.push(field.trim());rows.push(row);row=[];field='';}
   else if(c!=='\r')field+=c;
  }
  if(quoted)throw new Error('CSV memiliki tanda kutip yang tidak berpasangan.');
- if(field.length||row.length){row.push(field);rows.push(row);}
+ if(field.length||row.length){row.push(field.trim());rows.push(row);}
  return rows.filter(r=>r.some(v=>String(v).trim()!==''));
+}
+function normalizePurchaseDate(value){
+ const v=String(value??'').trim();
+ if(/^\d{4}-\d{2}-\d{2}$/.test(v))return v;
+ const m=v.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+ if(m)return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');
+ return v;
+}
+function parsePurchaseNumber(value){
+ let v=String(value??'').trim().replace(/\s/g,'');
+ if(v.includes(',')&&v.includes('.'))v=v.replace(/\./g,'').replace(',','.');
+ else if(v.includes(','))v=v.replace(',','.');
+ else if((v.match(/\./g)||[]).length>1)v=v.replace(/\./g,'');
+ return Number(v);
 }
 $('purchaseCsvTemplate').addEventListener('click',()=>downloadPurchaseCsv([{tanggal:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Jakarta'}),cabang:branches[0]?.name||'Nama Cabang',bahan:'Ayam',qty:'10',satuan:'kg',harga_satuan:'35000',supplier:'Supplier Contoh',catatan:'Contoh pembelian'}],'template_pembelian_bahan.csv'));
 $('purchaseCsvExport').addEventListener('click',async()=>{
@@ -714,7 +733,7 @@ $('purchaseCsvFile').addEventListener('change',async e=>{
  try{
   const raw=parsePurchaseCsv((await file.text()).replace(/^\uFEFF/,''));
   if(raw.length<2)throw new Error('File CSV kosong atau hanya berisi header.');
-  const headers=raw[0].map(x=>String(x).trim().toLowerCase());
+  const headers=raw[0].map(x=>String(x).trim().toLowerCase().replace(/\s+/g,'_'));
   const required=['tanggal','cabang','bahan','qty','satuan','harga_satuan'];
   const missing=required.filter(h=>!headers.includes(h));if(missing.length)throw new Error('Kolom wajib tidak ditemukan: '+missing.join(', '));
   const idx=Object.fromEntries(headers.map((h,i)=>[h,i]));
@@ -722,9 +741,9 @@ $('purchaseCsvFile').addEventListener('change',async e=>{
   const branchById=new Map(branches.map(b=>[String(b.id),b.id]));
   const converted=raw.slice(1).map((r,i)=>{
    const get=k=>String(r[idx[k]]??'').trim();
-   const date=get('tanggal'),branchText=get('cabang'),item=get('bahan'),qty=Number(get('qty')),unitPrice=Number(get('harga_satuan'));
+   const date=normalizePurchaseDate(get('tanggal')),branchText=get('cabang'),item=get('bahan'),qty=parsePurchaseNumber(get('qty')),unitPrice=parsePurchaseNumber(get('harga_satuan'));
    const branchId=branchById.get(branchText)||branchByName.get(branchText.toLowerCase());
-   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!branchId||!item||!Number.isFinite(qty)||qty<=0||!Number.isSafeInteger(unitPrice)||unitPrice<0)throw new Error('Data baris '+(i+2)+' tidak valid. Periksa tanggal (YYYY-MM-DD), cabang, bahan, qty, dan harga satuan.');
+   if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!branchId||!item||!Number.isFinite(qty)||qty<=0||!Number.isSafeInteger(unitPrice)||unitPrice<0)throw new Error('Data baris '+(i+2)+' tidak valid. Periksa tanggal (YYYY-MM-DD atau DD/MM/YYYY), cabang, bahan, qty, dan harga satuan.');
    return {branch_id:branchId,purchase_date:date,item_name:item,qty,unit:get('satuan')||'lainnya',unit_price:unitPrice,supplier:get('supplier')||null,note:get('catatan')||null,created_by:user.id};
   });
   if(converted.length>1000)throw new Error('Maksimal 1.000 baris per sekali import.');
